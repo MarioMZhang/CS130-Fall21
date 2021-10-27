@@ -7,7 +7,8 @@ var logger = require('morgan');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require("./routes/login");
-var apiRouter = require("./routes/api");
+var apiHubsRouter = require("./routes/api-hubs");
+// var apiJobsRouter = require("./routes/api-jobs");
 
 var app = express();
 
@@ -25,9 +26,9 @@ client.connect('mongodb://localhost:27017/', (err) => {
 	app.use(express.static(path.join(__dirname, 'public')));
 
 	app.use('/', indexRouter);
-	// app.use('/users', usersRouter);
 	app.use('/login', loginRouter);
-	app.use('/api', apiRouter);
+	app.use('/api', apiHubsRouter);
+	// app.use('/api', apiJobsRouter);
 
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {

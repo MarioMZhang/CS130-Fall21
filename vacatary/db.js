@@ -1,3 +1,6 @@
+/* Helper functions for the MongoDB Database. */
+/* This can be refactored to OO style for better modularity. */
+
 const MongoClient = require('mongodb').MongoClient;
 const options = { useUnifiedTopology: true, writeConcern: { j: true } };
 let client = null;
