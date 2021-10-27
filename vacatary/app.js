@@ -45,7 +45,6 @@ client.connect('mongodb://localhost:27017/', (err) => {
 	  res.render('error');
 	});
 
-
 })
 
 module.exports = app;

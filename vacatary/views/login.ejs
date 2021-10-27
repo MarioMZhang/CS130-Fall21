@@ -12,21 +12,15 @@
             <h2><%= prompt%></h2>
             <form action="login" method="POST">
                 <div>
-                    <!-- <label for="username">User Name: </label> -->
                     <input type="text" name="username" placeholder="username">
                 </div>
                 <div>
-                    <!-- <label for="password">Password: </label> -->
                     <input type="text" name="password" placeholder="password">
                 </div>
-                <div class="checkbox">
-                    <input type="checkbox" id="userCheckbox">
-                    <label for="userCheckbox">I am an User.</label>
-                </div>
-                <div class="checkbox">
-                    <input type="checkbox" id="driverCheckbox">
-                    <label for="driverCheckbox">I am an Driver.</label>
-                </div>
+                <select name="usertype" id="usertype">
+                    <option value="user">I am an user</option>
+                    <option value="driver">I am a driver</option>
+                </select>
                 <%if (has_redirect) {%>
                     <input type="hidden" name="redirect" value='<%= redirect_target%>'>
                 <%} %>
