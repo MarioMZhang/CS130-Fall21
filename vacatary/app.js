@@ -3,19 +3,20 @@ var express = require('express');
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+let foo = require('./db');
 
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require("./routes/login");
 var apiHubsRouter = require("./routes/api-hubs");
+var testRouter = require("./routes/test");
 // var apiJobsRouter = require("./routes/api-jobs");
 
 var app = express();
 
 //database setup
-let client = require('./db');
-client.connect('mongodb://localhost:27017/', (err) => {
-	// view engine setup
+foo.Database.connect('mongodb://localhost:27017/', (err) => {
+// view engine setup
 	app.set('views', path.join(__dirname, 'views'));
 	app.set('view engine', 'ejs');
 
@@ -28,7 +29,7 @@ client.connect('mongodb://localhost:27017/', (err) => {
 	app.use('/', indexRouter);
 	app.use('/login', loginRouter);
 	app.use('/api', apiHubsRouter);
-	// app.use('/api', apiJobsRouter);
+	app.use('/test', testRouter);
 
 	// catch 404 and forward to error handler
 	app.use(function(req, res, next) {
