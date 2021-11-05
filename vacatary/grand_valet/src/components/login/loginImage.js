@@ -1,10 +1,9 @@
 import * as React from 'react';
+import $ from 'jquery';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
@@ -14,6 +13,11 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import logo from './logo3.jpeg';
 import './stylesheet.css';
+import Dropdown from "react-dropdown";
+
+const loginOptions = [
+    'User', 'Partner'
+];
 
 
 const theme = createTheme();
@@ -26,7 +30,17 @@ export default function LogInImage() {
         console.log({
             email: data.get('email'),
             password: data.get('password'),
+            identity: $(".Dropdown-placeholder").html(),
         });
+
+        // todo: HTTP GET/POST: /login
+        // todo: authenticate and redirect based on
+
+        const userPath = "/customer?stage=schedule";
+        const partnerPath = "/partner?stage=schedule";
+
+        // for now, login as user
+        window.location.href=userPath;
     };
 
     return (
@@ -83,10 +97,14 @@ export default function LogInImage() {
                                 id="password"
                                 autoComplete="current-password"
                             />
-                            <FormControlLabel
-                                control={<Checkbox value="remember" color="primary" />}
-                                label="Remember me"
+                            <br/>
+                            <br/>
+                            <Dropdown id="loginIdentity"
+                                      options={loginOptions}
+                                      placeholder="I am logging in as a ......"
+                                      style={{margin:"normal"}}
                             />
+
                             <Button
                                 type="submit"
                                 fullWidth
