@@ -1,7 +1,7 @@
 var express = require('express');
 var router = express.Router();
 
-var JobsModel = require('../db/models/JobsModel');
+var JobsModel = require('../JobsModel');
 var db = require('../db/db');
 
 //*jobs api*/
