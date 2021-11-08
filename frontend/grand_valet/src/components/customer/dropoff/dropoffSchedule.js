@@ -1,4 +1,5 @@
 import React from "react";
+import './dropoffSChedule.css';
 import 'react-tabulator/lib/styles.css';
 import { ReactTabulator } from 'react-tabulator'
 import 'react-tabulator/css/bootstrap/tabulator_bootstrap.min.css';
@@ -106,7 +107,7 @@ export default class DropoffSchedule extends React.Component{
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"90%", "height":"70%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"100%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={table_data}
