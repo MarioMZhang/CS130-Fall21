@@ -58,8 +58,8 @@ class Database {
         .then((user) => {
             if (user == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                return null;
             }
             return user;
         });
@@ -71,8 +71,8 @@ class Database {
         .then((hubs) => {
             if (hubs == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                throw "Error in database";
             }
             return hubs;
         });
@@ -95,8 +95,8 @@ class Database {
         .then((hubs) => {
             if (hubs == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                throw "Error in database";
             }
             return hubs;
         });
@@ -104,13 +104,13 @@ class Database {
 
     static read_hub(hubId, next) {
         return Database.db('GrandValet').collection('Hubs').findOne({hubId: hubId})
-        .then((hubs) => {
-            if (hubs == null) 
+        .then((hub) => {
+            if (hub == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                return null;
             }
-            return hubs;
+            return hub;
         });
     }
 
@@ -120,13 +120,13 @@ class Database {
         .then((user) => {
             if (user == null) 
             {
-                console.log(body);
+                //console.log(body);
                 let newData = {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime};
                 Database.db('GrandValet').collection('Meta').updateOne({}, { $set: {maxHubId: body.hubId}});
                 Database.db('GrandValet').collection('Hubs').insertOne(newData);
                 return;
             }
-            console.log(body);
+            //console.log(body);
             Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
         });
     }
@@ -135,8 +135,8 @@ class Database {
         .then((jobs) => {
             if (jobs == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                throw "Error in database";
             }
             return jobs;
         });
@@ -147,20 +147,20 @@ class Database {
         .then((job) => {
             if (job == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                return null;
             }
             return job;
         });
     }
 
     static store_job(body, next) {
-        console.log(body);
+        //console.log(body);
         return Database.db('GrandValet').collection('Jobs').findOne({jobId: body.jobId})
-        .then((user) => {
-            if (user == null) 
+        .then((job) => {
+            if (job == null) 
             {
-                console.log(body);
+                //console.log(body);
                 let newData = {type: body.type, jobId: body.jobId, scheduledTime: body.scheduledTime, status: body.status, licenceState: body.licenceState,
                     licenceNum: body.licenceNum, code: body.code, hubId: body.hubId, carLocation: body.carLocation, note: body.note,
                     driverUsername: body.driverUsername, customerUsername: body.customerUsername, advanceState: body.advanceState};
@@ -168,22 +168,34 @@ class Database {
                 Database.db('GrandValet').collection('Jobs').insertOne(newData);
                 return;
             }
-            console.log(body);
+            //console.log(body);
             Database.db('GrandValet').collection('Jobs').updateOne({jobId: body.jobId}, { $set: {type: body.type, jobId: body.jobId, scheduledTime: body.scheduledTime, status: body.status, licenceState: body.licenceState,
                 licenceNum: body.licenceNum, code: body.code, hubId: body.hubId, carLocation: body.carLocation, note: body.note,
                 driverUsername: body.driverUsername, customerUsername: body.customerUsername, advanceState: body.advanceState}});
         });
     }
 
-    static read_meta(next) {
+    static read_maxMaxJobId(next) {
         return Database.db('GrandValet').collection('Meta').find()
         .then((meta) => {
             if (meta == null) 
             {
-                console.log("bad")
-                return;
+                //console.log("bad")
+                throw "Error in database";
             }
-            return meta;
+            return meta.maxJobId;
+        });
+    }
+
+    static read_maxMaxHubId(next) {
+        return Database.db('GrandValet').collection('Meta').find()
+        .then((meta) => {
+            if (meta == null) 
+            {
+                //console.log("bad")
+                throw "Error in database";
+            }
+            return meta.maxHubId;
         });
     }
 }
