@@ -42,7 +42,6 @@ const dummyHubs = [
     },
 ];
 
-
 const table_columns = [
     { title: "ID", field: "id"},
     { title: "Description", field: "Description"},
@@ -60,6 +59,7 @@ var table_data = [
     {id:4, Description:"Hammer Museum", Distance: 5.9, Spots: 12, Opentime: 12512313, Closetime: 12333333, Available: true},
     {id:5, Description:"Wilshire", Distance: 4.6, Spots: 9, Opentime: 12512313, Closetime: 12333333, Available: false},
 ];
+
 
 
 // The function used to periodically get available hubs.
