@@ -1,0 +1,116 @@
+#root {
+  text-align: auto;
+}
+
+/* background for left side */
+.MuiGrid-root.MuiGrid-item.MuiGrid-grid-sm-4.MuiGrid-grid-md-7.css-11e383u-MuiGrid-root{
+  background-image: url('./images/color.jpg');
+  background-size: 200% 100%;
+}
+
+
+/* font in table */
+#hubTableContainerstyle{
+  display: flex;
+  /*padding-right: 5px;*/
+  color: #333;
+  width: 100%;
+  height: 100%;
+  font-size: 28px;
+  opacity: 0.8;
+}
+
+.tabulator-header{
+  font-size: 16px;
+
+}
+
+.tabulator-col-content{
+  color: #fff;
+  background-color: #333;
+}
+
+.tabulator-col{
+  border-bottom: blue;
+}
+
+.tabulator-row-even{
+  row-background-color: black !important;
+}
+
+.tabulator-row{
+  font-size: 16px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+.hubClass.tabulator{
+  height: 100%;
+  position:  relative;
+  animation-name:  button-ani;
+  animation-duration: 1s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+.MuiTypography-root.MuiTypography-h5.css-ag7rrr-MuiTypography-root{
+  padding-top: 50px;
+  padding-bottom: 30px;
+  position:  relative;
+  animation-name:  h-animation;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  }
+}
+
+
+@keyframes h-animation{
+    from{top: -100px}
+    to{top: 0px}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+.css-17vbkzs-MuiFormControl-root-MuiTextField-root{
+  position:  relative;
+  animation-name:  content-ani;
+  animation-duration: 0.8s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  }
+}
+
+
+@keyframes content-ani{
+    from{left: -100px}
+    to{left: 0px}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+.css-1vhaqj4-MuiButtonBase-root-MuiButton-root{
+  display: inline-block;
+  position:  relative;
+  animation-name:  button-ani;
+  animation-duration: 1s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  }
+}
+
+
+@keyframes button-ani{
+    from{opacity: 0};
+    to{opacity: 1}
+}
+
+@media (prefers-reduced-motion: no-preference) {
+.css-11lq3yg-MuiGrid-root{
+  display: inline-block;
+  position:  relative;
+  animation-name:  button-ani;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  }
+}
