@@ -2,7 +2,6 @@ import React from "react";
 import 'react-tabulator/lib/styles.css';
 import { ReactTabulator } from 'react-tabulator'
 import 'react-tabulator/css/bootstrap/tabulator_bootstrap.min.css';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
@@ -10,9 +9,14 @@ import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
+import TimePicker from 'rc-time-picker';
+import 'rc-time-picker/assets/index.css';
+import Map from './../../util/map';
+
+// import TimePicker from 'react-time-picker';
+
 
 
 // This is the page where user select the hub and fill out the form
@@ -54,13 +58,18 @@ const table_columns = [
 ];
 
 var table_data = [
-    {id:1, Description:"South of UCLA", Distance: 3.5, Spots: 7, Opentime: 12512313, Closetime: 12333333, Available: true},
-    {id:2, Description:"Westwood", Distance: 13.5, Spots: 1, Opentime: 12512313, Closetime: 12333333, Available: true},
-    {id:3, Description:"Target", Distance: 1.2, Spots: 0, Opentime: 12512313, Closetime: 12333333, Available: false},
-    {id:4, Description:"Hammer Museum", Distance: 5.9, Spots: 12, Opentime: 12512313, Closetime: 12333333, Available: true},
-    {id:5, Description:"Wilshire", Distance: 4.6, Spots: 9, Opentime: 12512313, Closetime: 12333333, Available: false},
+    {id:1, Description:"South of UCLA", Distance: 3.5, Spots: 7, Opentime: 12512313, Closetime: 12333333, Available: true, longitude: -118.462, latitude: 34.0689},
+    {id:2, Description:"Westwood", Distance: 13.5, Spots: 1, Opentime: 12512313, Closetime: 12333333, Available: true,  longitude: -118.39, latitude: 34.2},
+    {id:3, Description:"Target", Distance: 1.2, Spots: 0, Opentime: 12512313, Closetime: 12333333, Available: false, longitude: -118.482, latitude: 34.092},
+    {id:4, Description:"Hammer Museum", Distance: 5.9, Spots: 12, Opentime: 12512313, Closetime: 12333333, Available: true, longitude: -118.410, latitude: 34.0633},
+    {id:5, Description:"Wilshire", Distance: 4.6, Spots: 9, Opentime: 12512313, Closetime: 12333333, Available: false, longitude: -118.45, latitude: 34.0591},
 ];
 
+var options = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0,
+};
 
 // The function used to periodically get available hubs.
 function getHubs() {
@@ -76,14 +85,69 @@ function convertHubList() {
 }
 
 
+function errors(err) {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+}
+
 
 export default class DropoffSchedule extends React.Component{
-    el = React.createRef();
-    tabulator = null; //variable to hold your table
+    // el = React.createRef();
+    // tabulator = null; //variable to hold your table
+
+    constructor(props) {
+        super(props);
+        this.state = {
+            user_lat: 0,
+            user_lng: 0,
+            marker_crd: null
+        };
+    }
+
+
+
+    setUserLocation = (pos) => {
+        var crd = pos.coords;
+
+        this.setState({
+            user_lat: crd.latitude,
+            user_lng: crd.longitude,
+        });
+
+        console.log(crd.latitude);
+        console.log(crd.longitude);
+    };
+
 
     componentDidMount() {
         // retrieve list of hubs.
         // convert response body into table data.
+
+        if (navigator.geolocation) {
+            navigator.permissions
+                .query({ name: "geolocation" })
+                .then((result) => {
+                    if (result.state === "granted") {
+                        console.log(result.state);
+                        navigator.geolocation.getCurrentPosition(this.setUserLocation);
+                    } else if (result.state === "prompt") {
+                        console.log(result.state);
+                        navigator.geolocation.getCurrentPosition(this.setUserLocation, errors, options);
+                    } else if (result.state === "denied") {
+                        window.alert("Please enable geolocation!!");
+                    }
+                });
+        }
+
+        var marker_crd = [];
+
+        for (let i = 0; i < table_data.length; i ++) {
+            marker_crd.push({lat: table_data[i].latitude, lng: table_data[i].longitude});
+        }
+
+        this.setState({
+            marker_crd: marker_crd
+        })
+
     }
 
     //add table holder element to DOM
@@ -106,13 +170,16 @@ export default class DropoffSchedule extends React.Component{
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"90%", "height":"70%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"90%", "height":"40%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={table_data}
                                 rowClick={this.rowClick}
                                 className="hubClass"
                             />
+                        </div>
+                        <div>
+                            <Map center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd}/>
                         </div>
                     </Grid>
                     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -126,31 +193,32 @@ export default class DropoffSchedule extends React.Component{
                             }}
                         >
                             <Typography component="h1" variant="h5">
-                                Schedule Dropoff
+                                Schedule Drop Off
                             </Typography>
                             <Box component="form" noValidate sx={{ mt: 1 }}>
-                                <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    id="email"
-                                    label="Email Address"
-                                    name="email"
-                                    autoComplete="email"
-                                    autoFocus
-                                />
-                                <TextField
-                                    margin="normal"
-                                    required
-                                    fullWidth
-                                    name="password"
-                                    label="Password"
-                                    type="password"
-                                    id="password"
-                                    autoComplete="current-password"
-                                />
+                                <div style={{display:"flex", flexDirection:"row"}}>
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        name="license"
+                                        label="License Plate"
+                                        id="license"
+                                        autoFocus
+                                    />
+
+                                </div>
                                 <br/>
                                 <br/>
+                                <div style={{display:"flex", flexDirection:"row"}}>
+
+                                    <TimePicker
+                                        placeholder="Select drop off minute"
+                                        showSecond={false}
+                                        showMinute={false}
+                                        focusOnOpen={true}
+                                        style={{"width":"50%"}}
+                                    />
+                                </div>
                                 <Button
                                     type="submit"
                                     fullWidth
