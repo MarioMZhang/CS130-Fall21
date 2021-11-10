@@ -117,8 +117,8 @@ class Database {
     static store_hub(body, next) {
         //console.log(body);
         return Database.db('GrandValet').collection('Hubs').findOne({hubId: body.hubId})
-        .then((user) => {
-            if (user == null) 
+        .then((hub) => {
+            if (hub == null) 
             {
                 //console.log(body);
                 let newData = {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime};
@@ -127,7 +127,12 @@ class Database {
                 return;
             }
             //console.log(body);
-            Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
+            if (body.location != null) {
+                Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
+            }
+            else {
+                Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, startTime: body.startTime, endTime: body.endTime}});
+            }
         });
     }
 
