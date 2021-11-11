@@ -12,7 +12,7 @@ function App() {
   return (
       <BrowserRouter>
         <Switch>
-          <Route path="/" component={LogInImage} exact />
+          <Route path="/" component={LogInImage} exact/>
           <Route path="/signup" component={SignUp} />
           <Route path="/customer" component={CustomerDropoffWrapper}/>
           <Route path="/driver" component={DriverJobList} />
