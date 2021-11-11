@@ -1,4 +1,5 @@
 import React from "react";
+import './dropoffSChedule.css';
 import 'react-tabulator/lib/styles.css';
 import { ReactTabulator } from 'react-tabulator'
 import 'react-tabulator/css/bootstrap/tabulator_bootstrap.min.css';
@@ -46,7 +47,6 @@ const dummyHubs = [
     },
 ];
 
-
 const table_columns = [
     { title: "ID", field: "id"},
     { title: "Description", field: "Description"},
@@ -70,6 +70,7 @@ var options = {
     timeout: 5000,
     maximumAge: 0,
 };
+
 
 // The function used to periodically get available hubs.
 function getHubs() {
@@ -99,7 +100,8 @@ export default class DropoffSchedule extends React.Component{
         this.state = {
             user_lat: 0,
             user_lng: 0,
-            marker_crd: null
+            marker_crd: null,
+            chosen_hub: null,
         };
     }
 
@@ -116,6 +118,18 @@ export default class DropoffSchedule extends React.Component{
         console.log(crd.latitude);
         console.log(crd.longitude);
     };
+
+    tableRowClicked = (e, row) => {
+        console.log(row._row.data);
+        this.setState({
+            chosen_hub: {
+                id: row._row.data.id,
+                description: row._row.data.Description,
+                distance: row._row.data.Distance,
+            }
+        });
+    };
+
 
 
     componentDidMount() {
@@ -170,15 +184,15 @@ export default class DropoffSchedule extends React.Component{
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"90%", "height":"40%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"40%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={table_data}
-                                rowClick={this.rowClick}
+                                rowClick={this.tableRowClicked}
                                 className="hubClass"
                             />
                         </div>
-                        <div>
+                        <div style={{display: 'flex',  justifyContent:'center'}}>
                             <Map center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd}/>
                         </div>
                     </Grid>
@@ -192,31 +206,62 @@ export default class DropoffSchedule extends React.Component{
                                 alignItems: 'center',
                             }}
                         >
+                            {this.state.chosen_hub && <p>You have selected hub {this.state.chosen_hub.id} that is {this.state.chosen_hub.distance} miles away from you.</p>}
                             <Typography component="h1" variant="h5">
                                 Schedule Drop Off
                             </Typography>
-                            <Box component="form" noValidate sx={{ mt: 1 }}>
+                            <Box component="form" noValidate sx={{ mt: 1 }} >
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     <TextField
                                         margin="normal"
                                         required
+                                        fullWidth
                                         name="license"
                                         label="License Plate"
                                         id="license"
                                         autoFocus
+                                        style={{padding:5}}
+                                        disabled={this.state.chosen_hub === null}
                                     />
 
-                                </div>
-                                <br/>
-                                <br/>
-                                <div style={{display:"flex", flexDirection:"row"}}>
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="issuedState"
+                                        label="Issued State"
+                                        id="issuedState"
+                                        autoFocus
+                                        style={{padding:5}}
+                                        disabled={this.state.chosen_hub === null}
 
-                                    <TimePicker
-                                        placeholder="Select drop off minute"
-                                        showSecond={false}
-                                        showMinute={false}
-                                        focusOnOpen={true}
-                                        style={{"width":"50%"}}
+                                    />
+                                </div>
+                                <div style={{display:"flex", flexDirection:"row"}}>
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="hour"
+                                        label="Drop Off Hour "
+                                        id="hour"
+                                        autoFocus
+                                        style={{padding:5}}
+                                        disabled={this.state.chosen_hub === null}
+
+                                    />
+
+                                    <TextField
+                                        margin="normal"
+                                        required
+                                        fullWidth
+                                        name="minute"
+                                        label="Drop Off Minute "
+                                        id="minute"
+                                        autoFocus
+                                        style={{padding:5}}
+                                        disabled={this.state.chosen_hub === null}
+
                                     />
                                 </div>
                                 <Button

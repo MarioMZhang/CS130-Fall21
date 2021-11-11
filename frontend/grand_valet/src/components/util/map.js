@@ -2,8 +2,8 @@ import React from 'react'
 import { Marker, GoogleMap, LoadScript } from '@react-google-maps/api';
 
 const containerStyle = {
-    width: '800px',
-    height: '400px'
+    width: '100%',
+    height: '60vh'
 };
 
 // const center = {
@@ -44,7 +44,7 @@ function Map(props) {
                 center={center}
                 zoom={10}
             >
-                {marker_crd !== null && <Marker onLoad={onLoad} position={center} shape={} />}
+                {marker_crd !== null && <Marker onLoad={onLoad} position={center} />}
                 {marker_crd !== null && marker_crd.map(function(each_marker_crd, i) {
                     console.log(each_marker_crd);
                     return <Marker onLoad={onLoad} position={each_marker_crd} key={i} />;
