@@ -44,9 +44,12 @@ function Map(props) {
                 center={center}
                 zoom={10}
             >
-                {marker_crd !== null && <Marker onLoad={onLoad} position={center} />}
+                {marker_crd !== null && <Marker onLoad={onLoad} position={center} icon={"http://maps.google.com/mapfiles/ms/icons/purple-dot.png"} />}
                 {marker_crd !== null && marker_crd.map(function(each_marker_crd, i) {
                     console.log(each_marker_crd);
+                    if (each_marker_crd.lat === props.chosen_lat && each_marker_crd.lng === props.chosen_lng) {
+                        return <Marker onLoad={onLoad} position={each_marker_crd} key={i} icon={"http://maps.google.com/mapfiles/ms/icons/green-dot.png"}/>;
+                    }
                     return <Marker onLoad={onLoad} position={each_marker_crd} key={i} />;
                 })}
             </GoogleMap>
