@@ -183,10 +183,10 @@ The Backend.
 * [Server](#Server)
     * [GET /login](#Server.getLogin)
     * [POST /login](#Server.postLogin)
-    * [GET /api/hubs](#Server.getAPIHubs)
-    * [POST /api/hubs](#Server.postAPIHubs)
-    * [GET /api/jobs](#Server.getAPIJobs)
-    * [POST /api/jobs](#Server.postAPIJobs)
+    * [GET /api/hubs](#Server.getAPIHubs) ⇒ <code>Array.&lt;Hub&gt;</code>
+    * [POST /api/hubs](#Server.postAPIHubs) ⇒ <code>Hub</code>
+    * [GET /api/jobs](#Server.getAPIJobs) ⇒ <code>Array.&lt;Job&gt;</code>
+    * [POST /api/jobs](#Server.postAPIJobs) ⇒ <code>Job</code>
 
 <a name="Server.getLogin"></a>
 
@@ -220,6 +220,7 @@ If long, lat, and rad are also given, only return active hubs that are in the ci
 radius rad. 
 
 **Kind**: static method of [<code>Server</code>](#Server)  
+<code>Array.&lt;Hub&gt;</code> - - Array of JSON of hubs  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -236,6 +237,7 @@ update the existing hub entry by overwriting the description, location, startTim
 Otherwise, return 404.
 
 **Kind**: static method of [<code>Server</code>](#Server) 
+**Returns**: <code>Hub</code> - - The updated or created Hub
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -254,6 +256,7 @@ If username exists and correspond to a driver, return a JSON containing a sorted
 If username exists and correspond to a customer, return a JSON containing a single job.
 
 **Kind**: static method of [<code>Server</code>](#Server) 
+**Returns**: <code>Array.&lt;Job&gt;</code> - - Array of JSON of jobs  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -262,11 +265,15 @@ If username exists and correspond to a customer, return a JSON containing a sing
 
 <a name="Server.postAPIJobs"></a>
 
-### POST /api/jobs()
-Descriptions
+### POST /api/jobs(data)
+Create a new job or update an existing job. First construct a Job object using the data given. 
+If the jobId is 0, create a new job and add it to the database and return the job with code 201.
+Otherwise, update the status of an existing job and return the hub with code 200. 
+If the jobId is not 0 and the job is not found, return 400.
 
 **Kind**: static method of [<code>Server</code>](#Server) 
+**Returns**: <code>Job</code> - - The updated or created job
 
 | Param | Type | Description |
 | --- | --- | --- |
-|  |  |  |
+| data | <code>JSON</code> | The data corresponding to a new job or an existing job. |
