@@ -85,11 +85,15 @@ class Database {
             return miles / earthRadiusInMiles;
         };
         let query = {
-            "location" : {
-                $geoWithin : {
-                    $centerSphere : [loc, milesToRadian(radius) ]
-                }
-            }
+            $and: [
+                { location : {
+                    $geoWithin : {
+                        $centerSphere : [loc, milesToRadian(radius) ]
+                    }
+                }}, 
+                { startTime : { $lt :  time}}, 
+                { endTime : { $gt :  time}}
+            ]
         };
         return Database.db('GrandValet').collection('Hubs').find(query).toArray()
         .then((hubs) => {
@@ -117,8 +121,8 @@ class Database {
     static store_hub(body, next) {
         //console.log(body);
         return Database.db('GrandValet').collection('Hubs').findOne({hubId: body.hubId})
-        .then((user) => {
-            if (user == null) 
+        .then((hub) => {
+            if (hub == null) 
             {
                 //console.log(body);
                 let newData = {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime};
@@ -127,149 +131,98 @@ class Database {
                 return;
             }
             //console.log(body);
-            Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
+            if (body.location != null) {
+                Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
+            }
+            else {
+                Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, startTime: body.startTime, endTime: body.endTime}});
+            }
         });
+    }
+
+    static schedule_jobs(next) {
+        let currentTime = new Date().getTime();
+        let query1 = {
+            $and:[
+                {$or: [{ status : 1 }, { status : 6 }]},
+                { scheduledTime : { $lt :  (currentTime + 3600)}}
+            ]
+        };
+        return Database.db('GrandValet').collection('Jobs').find(query1).toArray()
+        .then((jobsToBeAssigned) => {
+            // To check available drivers
+            let query2 = {
+                $and:[
+                    { type : 2 },
+                    { driverStatus : 1 }
+                ]
+            };    
+            
+            for (let jobToBeAssigned of jobsToBeAssigned) {
+                //console.log('should not be here');
+                Database.db('GrandValet').collection('Users').aggregate([
+                    {
+                        $match: {
+                            $and:[
+                                { type : 2 },
+                                { driverStatus : 1 }
+                            ]
+                        }
+                    },
+                    {
+                        $lookup: {
+                                from: "Jobs",
+                                localField: "username",
+                                foreignField: "driverUsername",
+                                as: "driverJobs"
+                            }
+                    },
+                    {
+                       $project: {
+                            username: 1,
+                            numberOfJobs: { $size: "$driverJobs" }
+                       }
+                    }
+                ]).sort( { numberOfJobs: 1 } ).toArray()
+                .then((driversAvailable) => {
+                    if (driversAvailable.length > 0)
+                    {
+                        let assignedDriver = driversAvailable[0].username;
+                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver, status: jobToBeAssigned.status+1 }});
+                    }
+                })
+            }
+        })
     }
 
     // TODO: Potential problem in time zone
     // TODO: Does not return immediate update
     static read_assignedJobs(username, next) {
-        let currentTime = new Date().getTime();
-        let query1 = {
-            $and:[
-                {$or: [{ status : 1 }, { status : 6 }]},
-                { scheduledTime : { $lt :  (currentTime + 3600)}}
-            ]
-        };
-        return Database.db('GrandValet').collection('Jobs').find(query1).toArray()
-        .then((jobsToBeAssigned) => {
-            //console.log(jobsToBeAssigned);
-            // To check available drivers
-            let query2 = {
-                $and:[
-                    { type : 2 },
-                    { driverStatus : 1 }
-                ]
-            };    
-            
-            for (let jobToBeAssigned of jobsToBeAssigned) {
-                //console.log('should not be here');
-                Database.db('GrandValet').collection('Users').aggregate([
-                    {
-                        $match: {
-                            $and:[
-                                { type : 2 },
-                                { driverStatus : 1 }
-                            ]
-                        }
-                    },
-                    {
-                        $lookup: {
-                                from: "Jobs",
-                                localField: "username",
-                                foreignField: "driverUsername",
-                                as: "driverJobs"
-                            }
-                    },
-                    {
-                       $project: {
-                            username: 1,
-                            numberOfJobs: { $size: "$driverJobs" }
-                       }
-                    }
-                ]).sort( { numberOfJobs: 1 } ).toArray()
-                .then((driversAvailable) => {
-                    if (driversAvailable.length > 0)
-                    {
-                        let assignedDriver = driversAvailable[0].username;
-                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver}});
-                    }
-                })
-            }
-            //console.log('right');
-        }).then(() => {
+        return Database.schedule_jobs().then(() => {
             return Database.db('GrandValet').collection('Jobs').find({driverUsername: username}).toArray()
             .then((jobs) => {
                 if (jobs == null) 
                 {
-                    //console.log("bad")
                     throw "Error in database";
                 }
                 return jobs;
             });
         });
-
     }
 
     // TODO: Potential problem in time zone
     // TODO: Does not return immediate update
     static read_job(jobId, next) {
-        let currentTime = new Date().getTime();
-        let query1 = {
-            $and:[
-                {$or: [{ status : 1 }, { status : 6 }]},
-                { scheduledTime : { $lt :  (currentTime + 3600)}}
-            ]
-        };
-        return Database.db('GrandValet').collection('Jobs').find(query1).toArray()
-        .then((jobsToBeAssigned) => {
-            //console.log(jobsToBeAssigned);
-            // To check available drivers
-            let query2 = {
-                $and:[
-                    { type : 2 },
-                    { driverStatus : 1 }
-                ]
-            };    
-            
-            for (let jobToBeAssigned of jobsToBeAssigned) {
-                //console.log('should not be here');
-                Database.db('GrandValet').collection('Users').aggregate([
-                    {
-                        $match: {
-                            $and:[
-                                { type : 2 },
-                                { driverStatus : 1 }
-                            ]
-                        }
-                    },
-                    {
-                        $lookup: {
-                                from: "Jobs",
-                                localField: "username",
-                                foreignField: "driverUsername",
-                                as: "driverJobs"
-                            }
-                    },
-                    {
-                       $project: {
-                            username: 1,
-                            numberOfJobs: { $size: "$driverJobs" }
-                       }
-                    }
-                ]).sort( { numberOfJobs: 1 } ).toArray()
-                .then((driversAvailable) => {
-                    if (driversAvailable.length > 0)
-                    {
-                        let assignedDriver = driversAvailable[0].username;
-                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver}});
-                    }
-                })
-            }
-            //console.log('right');
-        }).then(() => {
+        return Database.schedule_jobs().then(() => {
             return Database.db('GrandValet').collection('Jobs').findOne({jobId: jobId})
             .then((job) => {
                 if (job == null) 
                 {
                     return null;
                 }
-                //console.log(job);
                 return job;
             });
         });
-
-
     }
 
     static store_job(body, next) {
@@ -317,7 +270,6 @@ class Database {
         });
     }
 }
-// export connect(), db() and close() from the module
-module.exports = {Database};
-//module.exports = {grandValet};
 
+
+module.exports = {Database};
