@@ -53,7 +53,13 @@ router.get('/get3', function(req, res, next) {
 	res.status(200);
     grandValet.Database.read_nearbyHubs([-118.4452, 34.0689], 0.5)
     .then((fileFromDB) => {
-        res.send(fileFromDB);
+        if (fileFromDB[0].hubId === nearby.hubId)
+        {
+            res.send("Nearby test with latitude and longitude passed.")
+        }
+        else{
+            res.send(fileFromDB)
+        }
     })
 })
 
@@ -62,7 +68,14 @@ router.get('/get2', function(req, res, next) {
 	res.status(200);
     grandValet.Database.read_activeHubs()
     .then((fileFromDB) => {
-        res.send(fileFromDB);
+        if (fileFromDB[0].hubId === nearby.hubId && fileFromDB[1].hubId === activhub3.hubId)
+        {
+            res.send(`Read active hubs. Test passed.`)
+        }
+        else{
+            res.send(fileFromDB)
+        }
+        
     })
 })
 
@@ -71,7 +84,13 @@ router.get('/get4', function(req, res, next) {
 	res.status(200);
     grandValet.Database.read_hub(2)
     .then((fileFromDB) => {
-        res.send(fileFromDB);
+        if (fileFromDB.hubId === nearby.hubId)
+        {
+            res.send(`Got hubId ${2} Test passed.`)
+        }
+        else{
+            res.send(fileFromDB)
+        }
     })
 })
 
@@ -87,15 +106,28 @@ router.get('/get5', function(req, res, next) {
 	res.status(200);
     grandValet.Database.read_job(4)
     .then((fileFromDB) => {
-        res.send(fileFromDB);
+        if (fileFromDB.jobId === newJob2.jobId)
+        {
+            res.send(`Got jobID ${4}. Test passed.`)
+        }
+        else{
+            res.send(fileFromDB)
+        }
     })
 })
 
 router.get('/get6', function(req, res, next) {
 	res.status(200);
+  
     grandValet.Database.read_assignedJobs("truck_driver")
     .then((fileFromDB) => {
-        res.send(fileFromDB);
+        if (fileFromDB[0].driverUsername === newJob2.driverUsername)
+        {
+            res.send(`Read Assigned Job. Test passed.`)
+        }
+        else{
+            res.send(fileFromDB)
+        }
     })
 })
 
