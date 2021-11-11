@@ -9,7 +9,7 @@ Class wrapping database operations.
 **Kind**: global class  
 
 * [Database](#Database)
-    * [.connect(url)](#Database.connect)
+    * [.connect()](#Database.connect)
     * [.db(dbName)](#Database.db) ⇒ <code>database</code>
     * [.close()](#Database.close)
     * [.store_user(body)](#Database.store_user)
@@ -27,15 +27,10 @@ Class wrapping database operations.
 
 <a name="Database.connect"></a>
 
-### Database.connect(url)
+### Database.connect()
 Connect the database
 
 **Kind**: static method of [<code>Database</code>](#Database)  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| url | <code>string</code> | The url for the database |
-
 <a name="Database.db"></a>
 
 ### Database.db(dbName) ⇒ <code>database</code>
@@ -175,6 +170,7 @@ Reads the currect maximum hubId
 
 **Kind**: static method of [<code>Database</code>](#Database)  
 **Returns**: <code>number</code> - - Currect maximum hubId.  
+
 
 <a name="Server"></a>
 
