@@ -193,11 +193,7 @@ The Backend.
 ### GET /login()
 Returns an HTML page containing an HTML form with three input elements: username, usertype, and password. When the user presses the submit button, the page should issue a request <code>POST /login</code> with <code>username=:username&usertype=:usertype&password=:password</code> in the body.
 
-**Kind**: 
-
-| Param | Type | Description |
-| --- | --- | --- |
-|  |  |  |
+**Kind**: static method of [<code>Server</code>](#Server)  
 
 <a name="Server.postLogin"></a>
 
@@ -214,13 +210,14 @@ Checks that the provided username, usertype, and password matches the record. If
 
 <a name="Server.getAPIHubs"></a>
 
-### GET /api/hubs(hubid=null, long=null, lat=null, rad=null)
+### GET /api/hubs(hubid=null, long=null, lat=null, rad=null) ⇒ <code>Array.&lt;Hub&gt;</code>
 Returns the information of the requested hub(s). If hubid is <code>null</code>, return all the active hubs in the database. 
 If long, lat, and rad are also given, only return active hubs that are in the circle centered at (long, lat) with 
 radius rad. 
 
 **Kind**: static method of [<code>Server</code>](#Server)  
-<code>Array.&lt;Hub&gt;</code> - - Array of JSON of hubs  
+
+**Returns**: <code>Array.&lt;Hub&gt;</code> - - Array of JSON of hubs  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -229,7 +226,7 @@ radius rad.
 | lat | <code>number</code> | A number specifying the latitude of the center of search range | 
 | rad | <code>number</code> | A number specifying the circle of search range | 
 
-<a name="Server.postAPIHubs"></a>
+<a name="Server.postAPIHubs"></a>  ⇒ <code>Hub</code>
 
 ### POST /api/hubs(hubId, description, startTime, endTime, location=null)
 Create or update a hub entry. If hubId is 0, insert a new hub and return 201. If hubId> 0 and hubIdrecord exists, 
@@ -237,6 +234,7 @@ update the existing hub entry by overwriting the description, location, startTim
 Otherwise, return 404.
 
 **Kind**: static method of [<code>Server</code>](#Server) 
+
 **Returns**: <code>Hub</code> - - The updated or created Hub
 
 | Param | Type | Description |
@@ -247,7 +245,7 @@ Otherwise, return 404.
 | endTime | <code>endTime</code> | When the hub ends | 
 | location | <code>array</code> | Longitude and Latitude of the hub (can be null) |
 
-<a name="Server.getAPIJobs"></a>
+<a name="Server.getAPIJobs"></a> ⇒ <code>Array.&lt;Job&gt;</code>
 
 ### GET /api/jobs(username=null, jobid=null)
 Get all the jobs associated with username or jobid. If username or jobid does not exist, return 404.
@@ -256,6 +254,7 @@ If username exists and correspond to a driver, return a JSON containing a sorted
 If username exists and correspond to a customer, return a JSON containing a single job.
 
 **Kind**: static method of [<code>Server</code>](#Server) 
+
 **Returns**: <code>Array.&lt;Job&gt;</code> - - Array of JSON of jobs  
 
 | Param | Type | Description |
@@ -263,7 +262,7 @@ If username exists and correspond to a customer, return a JSON containing a sing
 | username | <code>string</code> | User name |
 | jobid | <code>number</code> | The unique job id | 
 
-<a name="Server.postAPIJobs"></a>
+<a name="Server.postAPIJobs"></a> ⇒ <code>Job</code>
 
 ### POST /api/jobs(data)
 Create a new job or update an existing job. First construct a Job object using the data given. 
@@ -272,6 +271,7 @@ Otherwise, update the status of an existing job and return the hub with code 200
 If the jobId is not 0 and the job is not found, return 400.
 
 **Kind**: static method of [<code>Server</code>](#Server) 
+
 **Returns**: <code>Job</code> - - The updated or created job
 
 | Param | Type | Description |
