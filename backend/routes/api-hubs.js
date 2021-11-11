@@ -8,10 +8,10 @@ let GrandValet = require('../db-v2');
 /* GET api. */
 router.get('/hubs', function(req, res, next) {
 	// TODO: maybe add some other fields
-	let hubid = req.query.hubid;
+	let hubId = req.query.hubId;
 
-	// if hubid is null, return all the active hubs 
-	if(hubid == null) {
+	// if hubId is null, return all the active hubs 
+	if(hubId == null) {
 		GrandValet.Database.read_activeHubs().then((hubs) => {
 			hubs.forEach((x) => { delete x._id; });
 			res.status(200);
@@ -20,9 +20,9 @@ router.get('/hubs', function(req, res, next) {
 		})
 	}
 
-	// if hubid is not null, only return the hub corresponding to that id
+	// if hubId is not null, only return the hub corresponding to that id
 	else {
-		GrandValet.Database.read_hub(parseInt(hubid)).then((hub) => {
+		GrandValet.Database.read_hub(parseInt(hubId)).then((hub) => {
 			if(hub != null) {
 				delete hub._id;
 				res.status(200);
@@ -47,17 +47,18 @@ router.post('/hubs', function(req, res, next) {
 		res.send("Bad request format.");
 	}
 	else {
-		let hubid = parseInt(req.body.hubId);
+		let hubId = parseInt(req.body.hubId);
 		// new hub 
-		if (hubid == 0) {
+		if (hubId == 0) {
 			// get max postid, then update both databases
 			GrandValet.Database.read_maxMaxHubId().then((maxHubId) => {
 				let new_entry = {};
-				new_entry.hubid = maxHubId + 1;
+				new_entry.hubId = maxHubId + 1;
 				new_entry.description = req.body.description;
-				new_entry.startTime = req.body.startTime;
-				new_entry.endTime = req.body.endTime;
-				new_entry.location = req.body.location;
+				new_entry.startTime = parseInt(req.body.startTime);
+				new_entry.endTime = parseInt(req.body.endTime);
+				new_entry.location = [parseFloat(req.body.location[0]), parseFloat(req.body.location[1])];
+
 				GrandValet.Database.store_hub(new_entry).then(() => {
 					res.status(201);
 					res.append('Content-Type', 'application/json');
@@ -66,25 +67,25 @@ router.post('/hubs', function(req, res, next) {
 			})
 		}
 		// update existing hub
-		else if (hubid > 0){
-			GrandValet.Database.read_hub(hubid).then((hub) => {
+		else if (hubId > 0){
+			GrandValet.Database.read_hub(hubId).then((hub) => {
 				if(hub == null) {
 					res.status(404);
 					res.send("Bad request: cannot find specified hub.");
 				}
 				else {
-					GrandValet.Database.store_hub({hubId: hubid, description: req.body.description, startTime: req.body.startTime, endTime: req.body.endTime, location: req.body.location})
+					GrandValet.Database.store_hub({hubId: hubId, description: req.body.description, startTime: req.body.startTime, endTime: req.body.endTime, location: req.body.location})
 					.then(() => {
 						res.status(200);
 						res.append('Content-Type', 'application/json');
-						res.json({hubId: hubid, description: req.body.description, startTime: req.body.startTime, endTime: req.body.endTime, location: req.body.location});
+						res.json({hubId: hubId, description: req.body.description, startTime: req.body.startTime, endTime: req.body.endTime, location: req.body.location});
 					})
 				}
 			})
 		}
 		else {
 			res.status(400);
-			res.send("Bad request format: hubid must be nonnegative.");
+			res.send("Bad request format: hubId must be nonnegative.");
 		}
 	}
 })
