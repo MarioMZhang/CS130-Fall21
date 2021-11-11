@@ -15,6 +15,7 @@ Class wrapping database operations.
     * [.read_nearbyHubs(loc, radius)](#Database.read_nearbyHubs) ⇒ <code>Array.&lt;Hub&gt;</code>
     * [.read_hub(hubId)](#Database.read_hub) ⇒ <code>Hub</code>
     * [.store_hub(body)](#Database.store_hub)
+    * [.schedule_jobs()](#Database.schedule_jobs)
     * [.read_assignedJobs(username)](#Database.read_assignedJobs) ⇒ <code>Array.&lt;Job&gt;</code>
     * [.read_job(jobId)](#Database.read_job) ⇒ <code>Job</code>
     * [.store_job(body)](#Database.store_job)
@@ -116,10 +117,16 @@ Stores a hub
 | --- | --- | --- |
 | body | <code>Hub</code> | JSON of a hub file. |
 
+<a name="Database.schedule_jobs"></a>
+
+### Database.schedule\_jobs()
+Schedule unassigned jobs that are within 1 hr from scheduled time.
+
+**Kind**: static method of [<code>Database</code>](#Database)  
 <a name="Database.read_assignedJobs"></a>
 
 ### Database.read\_assignedJobs(username) ⇒ <code>Array.&lt;Job&gt;</code>
-Reads jobs assigned to a driver and assign jobs is within 1 hr of scheduled time.
+Reads jobs assigned to a driver and assign jobs using schedule_jobs.
 
 **Kind**: static method of [<code>Database</code>](#Database)  
 **Returns**: <code>Array.&lt;Job&gt;</code> - - Array of JSON of jobs assigned to the driver.  
@@ -131,7 +138,7 @@ Reads jobs assigned to a driver and assign jobs is within 1 hr of scheduled time
 <a name="Database.read_job"></a>
 
 ### Database.read\_job(jobId) ⇒ <code>Job</code>
-Reads a job and assign jobs is within 1 hr of scheduled time.
+Reads a job and assign jobs using schedule_jobs.
 
 **Kind**: static method of [<code>Database</code>](#Database)  
 **Returns**: <code>Job</code> - - JSON of the requested job.  
