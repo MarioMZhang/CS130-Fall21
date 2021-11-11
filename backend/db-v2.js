@@ -11,7 +11,6 @@ class Database {
     // create a connection to url and call callback()
     /**
      * Connect the database
-     * @param {string} url - The url for the database
      */
      static connect(callback) {
         let url = 'mongodb://localhost:27017/';
