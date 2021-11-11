@@ -309,7 +309,7 @@ class Database {
      * @returns {number} - Currect maximum jobId.
      */
      static read_maxMaxJobId(next) {
-        return Database.db('GrandValet').collection('Meta').find()
+        return Database.db('GrandValet').collection('Meta').findOne()
         .then((meta) => {
             if (meta == null) 
             {
@@ -325,7 +325,7 @@ class Database {
      * @returns {number} - Currect maximum hubId.
      */
      static read_maxMaxHubId(next) {
-        return Database.db('GrandValet').collection('Meta').find()
+        return Database.db('GrandValet').collection('Meta').findOne()
         .then((meta) => {
             if (meta == null) 
             {
