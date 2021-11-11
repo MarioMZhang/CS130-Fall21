@@ -226,9 +226,9 @@ radius rad.
 | lat | <code>number</code> | A number specifying the latitude of the center of search range | 
 | rad | <code>number</code> | A number specifying the circle of search range | 
 
-<a name="Server.postAPIHubs"></a>  ⇒ <code>Hub</code>
+<a name="Server.postAPIHubs"></a>  
 
-### POST /api/hubs(hubId, description, startTime, endTime, location=null)
+### POST /api/hubs(hubId, description, startTime, endTime, location=null) ⇒ <code>Hub</code>
 Create or update a hub entry. If hubId is 0, insert a new hub and return 201. If hubId> 0 and hubIdrecord exists, 
 update the existing hub entry by overwriting the description, location, startTime, endTime fields in the request. Return 200.
 Otherwise, return 404.
@@ -245,9 +245,9 @@ Otherwise, return 404.
 | endTime | <code>endTime</code> | When the hub ends | 
 | location | <code>array</code> | Longitude and Latitude of the hub (can be null) |
 
-<a name="Server.getAPIJobs"></a> ⇒ <code>Array.&lt;Job&gt;</code>
+<a name="Server.getAPIJobs"></a> 
 
-### GET /api/jobs(username=null, jobid=null)
+### GET /api/jobs(username=null, jobid=null) ⇒ <code>Array.&lt;Job&gt;</code>
 Get all the jobs associated with username or jobid. If username or jobid does not exist, return 404.
 If jobid is not null, return the job corresponding to the jobid. 
 If username exists and correspond to a driver, return a JSON containing a sorted list of jobs.
@@ -262,9 +262,9 @@ If username exists and correspond to a customer, return a JSON containing a sing
 | username | <code>string</code> | User name |
 | jobid | <code>number</code> | The unique job id | 
 
-<a name="Server.postAPIJobs"></a> ⇒ <code>Job</code>
+<a name="Server.postAPIJobs"></a> 
 
-### POST /api/jobs(data)
+### POST /api/jobs(data) ⇒ <code>Job</code>
 Create a new job or update an existing job. First construct a Job object using the data given. 
 If the jobId is 0, create a new job and add it to the database and return the job with code 201.
 Otherwise, update the status of an existing job and return the hub with code 200. 
