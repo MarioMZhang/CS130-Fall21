@@ -16,7 +16,7 @@ var testRouter = require("./routes/test");
 var app = express();
 
 //database setup
-dbv2.Database.connect('mongodb://localhost:27017/', (err) => {
+dbv2.Database.connect((err) => {
 	db.connect('mongodb://localhost:27017/', (err) => {
 		// view engine setup
 		app.set('views', path.join(__dirname, 'views'));
