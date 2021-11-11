@@ -13,7 +13,8 @@ class Database {
      * Connect the database
      * @param {string} url - The url for the database
      */
-     static connect(url, callback) {
+     static connect(callback) {
+        let url = 'mongodb://localhost:27017/';
         if (Database.client == null) {
             // create a mongodb client
             Database.client = new MongoClient(url, options);
