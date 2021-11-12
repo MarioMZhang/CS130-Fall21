@@ -1,0 +1,51 @@
+.MuiGrid-root.MuiGrid-item.MuiGrid-grid-sm-4.MuiGrid-grid-md-7.css-gj5jbs-MuiGrid-root{
+  background-image: url('./images/parking2.jpg');
+  background-size: 200% 75%;
+  background-position: top;
+  margin-bottom: 0em;
+}
+
+#hubTableContainerstyle{
+  display: flex;
+  /*padding-right: 5px;*/
+  color: #333;
+  width: 100%;
+  height: 100%;
+  font-size: 28px;
+  opacity: 0.9;
+  margin-bottom: 0em;
+}
+
+.MuiGrid-root.MuiGrid-item.MuiGrid-grid-sm-4.MuiGrid-grid-md-7.css-gj5jbs-MuiGrid-root p{
+  font-size: 28px;
+  font-weight: bold;
+  background-color: #fff;
+  padding-bottom: 500px;
+  margin: 0.5em;
+  opacity: 0.85;
+}
+
+.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation6.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-8.MuiGrid-grid-md-5.css-hmoegs-MuiPaper-root-MuiGrid-root p{
+  font-size: 28px;
+}
+
+.MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation6.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-8.MuiGrid-grid-md-5.css-hmoegs-MuiPaper-root-MuiGrid-root h1{
+  font-size: 28px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+.MuiBox-root.css-164r41r{
+  font-size: 20px;
+  padding-bottom: 100px;
+  position:  relative;
+  animation-name:  button-ani;
+  animation-duration: 0.5s;
+  animation-timing-function: ease-in;
+  animation-fill-mode: forwards;
+  }
+}
+
+@keyframes button-ani{
+    from{opacity: 0};
+    to{opacity: 1}
+}

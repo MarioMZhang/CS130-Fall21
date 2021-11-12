@@ -1,4 +1,5 @@
 import React from "react";
+import './joblist.css';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Grid from "@mui/material/Grid";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -213,7 +214,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div id="hubTableContainerstyle" style={{"width":"90%", "height":"70%"}}>
+                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={job_data}
@@ -236,7 +237,7 @@ export default class Joblist extends React.Component{
                             >
                                 <Box component="form" noValidate sx={{ mt: 1 }}>
                                     <br/>
-                                    <p>Schedule You Break ...</p>
+                                    <p>Schedule Your Break ...</p>
 
                                     <FormControl sx={{ m:1, midWidth: 180 }}>
                                         <InputLabel id="demo-simple-select-autowidth-label">Minute</InputLabel>
@@ -295,7 +296,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div id="hubTableContainerstyle" style={{"width":"90%", "height":"70%"}}>
+                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={job_data}
@@ -368,7 +369,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div id="hubTableContainerstyle" style={{"width":"90%", "height":"70%"}}>
+                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={job_data}
@@ -437,7 +438,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div id="hubTableContainerstyle" style={{"width":"90%", "height":"70%"}}>
+                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={job_data}
