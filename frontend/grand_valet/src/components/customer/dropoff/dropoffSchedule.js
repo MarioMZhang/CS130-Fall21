@@ -16,6 +16,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
 
+
 // import TimePicker from 'react-time-picker';
 
 
@@ -24,6 +25,8 @@ import Map from './../../util/map';
 
 
 const theme = createTheme();
+
+const state_options = ["California", "New York"];
 
 
 const dummyHubs = [
@@ -276,20 +279,8 @@ export default class DropoffSchedule extends React.Component{
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
                                 >
-                                    Sign In
+                                    Submit Request
                                 </Button>
-                                <Grid container>
-                                    <Grid item xs>
-                                        <Link href="#" variant="body2">
-                                            Forgot password?
-                                        </Link>
-                                    </Grid>
-                                    <Grid item>
-                                        <Link href="/signup" variant="body2">
-                                            {"Don't have an account? Sign Up"}
-                                        </Link>
-                                    </Grid>
-                                </Grid>
                             </Box>
                         </Box>
                     </Grid>
