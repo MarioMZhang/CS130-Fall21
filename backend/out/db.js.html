@@ -1,4 +1,32 @@
-/* Helper functions for the MongoDB Database. */
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Source: db.js</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Source: db.js</h1>
+
+    
+
+
+
+    
+    <section>
+        <article>
+            <pre class="prettyprint source linenums"><code>/* Helper functions for the MongoDB Database. */
 /* This can be refactored to OO style for better modularity. */
 
 const MongoClient = require('mongodb').MongoClient;
@@ -11,9 +39,9 @@ class Database {
     // create a connection to url and call callback()
     /**
      * Connect the database
+     * @param {string} url - The url for the database
      */
-     static connect(callback) {
-        let url = 'mongodb://localhost:27017/';
+    static connect(url, callback) {
         if (Database.client == null) {
             // create a mongodb client
             Database.client = new MongoClient(url, options);
@@ -39,14 +67,14 @@ class Database {
      * @param {string} dbName - Name of the database.
      * @returns {database} - Database for MongoDB operations.
      */
-     static db(dbName) {
+    static db(dbName) {
         return Database.client.db(dbName);
     }
 
     /**
      * Close the connection
      */
-     static close() {
+    static close() {
         if (Database.client) {
             Database.client.close();
             Database.client = null;
@@ -57,7 +85,7 @@ class Database {
      * Stores a user
      * @param {User} body - JSON of a user file.
      */
-     static store_user(body, next) {
+    static store_user(body, next) {
         return Database.db('GrandValet').collection('Users').findOne({username: body.username})
         .then((user) => {
             if (user == null) 
@@ -75,7 +103,7 @@ class Database {
      * @param {string} username - Username of the requested user.
      * @returns {User} - JSON of the requested user file.
      */
-      static read_user(username, next) {
+     static read_user(username, next) {
         return Database.db('GrandValet').collection('Users').findOne({username: username})
         .then((user) => {
             if (user == null) 
@@ -117,15 +145,11 @@ class Database {
             return miles / earthRadiusInMiles;
         };
         let query = {
-            $and: [
-                { location : {
-                    $geoWithin : {
-                        $centerSphere : [loc, milesToRadian(radius) ]
-                    }
-                }}, 
-                { startTime : { $lt :  time}}, 
-                { endTime : { $gt :  time}}
-            ]
+            "location" : {
+                $geoWithin : {
+                    $centerSphere : [loc, milesToRadian(radius) ]
+                }
+            }
         };
         return Database.db('GrandValet').collection('Hubs').find(query).toArray()
         .then((hubs) => {
@@ -143,7 +167,7 @@ class Database {
      * @param {number} hubId - ID of the requested hub.
      * @returns {Hub} - JSON of the requested hub.
      */
-     static read_hub(hubId, next) {
+    static read_hub(hubId, next) {
         return Database.db('GrandValet').collection('Hubs').findOne({hubId: hubId})
         .then((hub) => {
             if (hub == null) 
@@ -162,8 +186,8 @@ class Database {
      static store_hub(body, next) {
         //console.log(body);
         return Database.db('GrandValet').collection('Hubs').findOne({hubId: body.hubId})
-        .then((hub) => {
-            if (hub == null) 
+        .then((user) => {
+            if (user == null) 
             {
                 //console.log(body);
                 let newData = {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime};
@@ -172,19 +196,18 @@ class Database {
                 return;
             }
             //console.log(body);
-            if (body.location != null) {
-                Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
-            }
-            else {
-                Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, startTime: body.startTime, endTime: body.endTime}});
-            }
+            Database.db('GrandValet').collection('Hubs').updateOne({hubId: body.hubId}, { $set: {hubId: body.hubId, description: body.description, location: body.location, startTime: body.startTime, endTime: body.endTime}});
         });
     }
 
     /**
-     * Schedule unassigned jobs that are within 1 hr from scheduled time.
+     * Reads jobs assigned to a driver and assign jobs is within 1 hr of scheduled time.
+     * @param {string} username - Username of the requested driver.
+     * @returns {Job[]} - Array of JSON of jobs assigned to the driver.
      */
-     static schedule_jobs(next) {
+    // TODO: Potential problem in time zone
+    // TODO: Does not return immediate update
+    static read_assignedJobs(username, next) {
         let currentTime = new Date().getTime();
         let query1 = {
             $and:[
@@ -194,6 +217,7 @@ class Database {
         };
         return Database.db('GrandValet').collection('Jobs').find(query1).toArray()
         .then((jobsToBeAssigned) => {
+            //console.log(jobsToBeAssigned);
             // To check available drivers
             let query2 = {
                 $and:[
@@ -232,58 +256,106 @@ class Database {
                     if (driversAvailable.length > 0)
                     {
                         let assignedDriver = driversAvailable[0].username;
-                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver, status: jobToBeAssigned.status+1 }});
+                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver}});
                     }
                 })
             }
-        })
-    }
-
-    // TODO: Potential problem in time zone
-    // TODO: Does not return immediate update
-    /**
-     * Reads jobs assigned to a driver and assign jobs using schedule_jobs.
-     * @param {string} username - Username of the requested driver.
-     * @returns {Job[]} - Array of JSON of jobs assigned to the driver.
-     */
-     static read_assignedJobs(username, next) {
-        return Database.schedule_jobs().then(() => {
+            //console.log('right');
+        }).then(() => {
             return Database.db('GrandValet').collection('Jobs').find({driverUsername: username}).toArray()
             .then((jobs) => {
                 if (jobs == null) 
                 {
+                    //console.log("bad")
                     throw "Error in database";
                 }
                 return jobs;
             });
         });
+
     }
 
-    // TODO: Potential problem in time zone
-    // TODO: Does not return immediate update
     /**
-     * Reads a job and assign jobs using schedule_jobs.
+     * Reads a job and assign jobs is within 1 hr of scheduled time.
      * @param {number} jobId - ID of the requested job.
      * @returns {Job} - JSON of the requested job.
      */
-     static read_job(jobId, next) {
-        return Database.schedule_jobs().then(() => {
+    // TODO: Potential problem in time zone
+    // TODO: Does not return immediate update
+    static read_job(jobId, next) {
+        let currentTime = new Date().getTime();
+        let query1 = {
+            $and:[
+                {$or: [{ status : 1 }, { status : 6 }]},
+                { scheduledTime : { $lt :  (currentTime + 3600)}}
+            ]
+        };
+        return Database.db('GrandValet').collection('Jobs').find(query1).toArray()
+        .then((jobsToBeAssigned) => {
+            //console.log(jobsToBeAssigned);
+            // To check available drivers
+            let query2 = {
+                $and:[
+                    { type : 2 },
+                    { driverStatus : 1 }
+                ]
+            };    
+            
+            for (let jobToBeAssigned of jobsToBeAssigned) {
+                //console.log('should not be here');
+                Database.db('GrandValet').collection('Users').aggregate([
+                    {
+                        $match: {
+                            $and:[
+                                { type : 2 },
+                                { driverStatus : 1 }
+                            ]
+                        }
+                    },
+                    {
+                        $lookup: {
+                                from: "Jobs",
+                                localField: "username",
+                                foreignField: "driverUsername",
+                                as: "driverJobs"
+                            }
+                    },
+                    {
+                       $project: {
+                            username: 1,
+                            numberOfJobs: { $size: "$driverJobs" }
+                       }
+                    }
+                ]).sort( { numberOfJobs: 1 } ).toArray()
+                .then((driversAvailable) => {
+                    if (driversAvailable.length > 0)
+                    {
+                        let assignedDriver = driversAvailable[0].username;
+                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver}});
+                    }
+                })
+            }
+            //console.log('right');
+        }).then(() => {
             return Database.db('GrandValet').collection('Jobs').findOne({jobId: jobId})
             .then((job) => {
                 if (job == null) 
                 {
                     return null;
                 }
+                //console.log(job);
                 return job;
             });
         });
+
+
     }
 
     /**
      * Stores a job
      * @param {Job} body - JSON of a job file.
      */
-     static store_job(body, next) {
+    static store_job(body, next) {
         //console.log(body);
         return Database.db('GrandValet').collection('Jobs').findOne({jobId: body.jobId})
         .then((job) => {
@@ -308,8 +380,8 @@ class Database {
      * Reads the currect maximum jobId
      * @returns {number} - Currect maximum jobId.
      */
-     static read_maxMaxJobId(next) {
-        return Database.db('GrandValet').collection('Meta').findOne()
+    static read_maxMaxJobId(next) {
+        return Database.db('GrandValet').collection('Meta').find()
         .then((meta) => {
             if (meta == null) 
             {
@@ -325,7 +397,7 @@ class Database {
      * @returns {number} - Currect maximum hubId.
      */
      static read_maxMaxHubId(next) {
-        return Database.db('GrandValet').collection('Meta').findOne()
+        return Database.db('GrandValet').collection('Meta').find()
         .then((meta) => {
             if (meta == null) 
             {
@@ -336,6 +408,30 @@ class Database {
         });
     }
 }
-
-
+// export connect(), db() and close() from the module
 module.exports = {Database};
+//module.exports = {grandValet};
+
+</code></pre>
+        </article>
+    </section>
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Database.html">Database</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.7</a> on Tue Nov 09 2021 21:36:17 GMT-0800 (Pacific Standard Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
