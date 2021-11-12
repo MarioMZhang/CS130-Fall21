@@ -16,6 +16,7 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
 
+
 // import TimePicker from 'react-time-picker';
 
 
@@ -24,6 +25,8 @@ import Map from './../../util/map';
 
 
 const theme = createTheme();
+
+const state_options = ["California", "New York"];
 
 
 const dummyHubs = [
@@ -102,6 +105,8 @@ export default class DropoffSchedule extends React.Component{
             user_lng: 0,
             marker_crd: null,
             chosen_hub: null,
+            chosen_lat: null,
+            chosen_lng: null,
         };
     }
 
@@ -119,17 +124,21 @@ export default class DropoffSchedule extends React.Component{
         console.log(crd.longitude);
     };
 
+
     tableRowClicked = (e, row) => {
         console.log(row._row.data);
+        var data = row._row.data;
+
         this.setState({
             chosen_hub: {
-                id: row._row.data.id,
-                description: row._row.data.Description,
-                distance: row._row.data.Distance,
-            }
+                id: data.id,
+                description: data.Description,
+                distance: data.Distance,
+            },
+            chosen_lat: data.latitude,
+            chosen_lng: data.longitude,
         });
     };
-
 
 
     componentDidMount() {
@@ -193,7 +202,7 @@ export default class DropoffSchedule extends React.Component{
                             />
                         </div>
                         <div style={{display: 'flex',  justifyContent:'center'}}>
-                            <Map center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd}/>
+                            <Map center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd} chosen_lat={this.state.chosen_lat} chosen_lng={this.state.chosen_lng}/>
                         </div>
                     </Grid>
                     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -270,20 +279,8 @@ export default class DropoffSchedule extends React.Component{
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
                                 >
-                                    Sign In
+                                    Submit Request
                                 </Button>
-                                <Grid container>
-                                    <Grid item xs>
-                                        <Link href="#" variant="body2">
-                                            Forgot password?
-                                        </Link>
-                                    </Grid>
-                                    <Grid item>
-                                        <Link href="/signup" variant="body2">
-                                            {"Don't have an account? Sign Up"}
-                                        </Link>
-                                    </Grid>
-                                </Grid>
                             </Box>
                         </Box>
                     </Grid>
