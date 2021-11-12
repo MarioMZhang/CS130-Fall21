@@ -6,6 +6,7 @@
 .MuiGrid-root.MuiGrid-item.MuiGrid-grid-sm-4.MuiGrid-grid-md-7.css-11e383u-MuiGrid-root{
   background-image: url('./images/color.jpg');
   background-size: 200% 100%;
+  
 }
 
 
@@ -15,7 +16,7 @@
   /*padding-right: 5px;*/
   color: #333;
   width: 100%;
-  height: 100%;
+  height: 40%;
   font-size: 28px;
   opacity: 0.8;
 }
