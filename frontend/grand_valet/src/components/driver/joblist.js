@@ -214,7 +214,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+                            <div data-testid="test-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={job_data}
@@ -235,7 +235,7 @@ export default class Joblist extends React.Component{
                                     alignItems: 'center',
                                 }}
                             >
-                                <Box component="form" noValidate sx={{ mt: 1 }}>
+                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
                                     <br/>
                                     <p>Schedule Your Break ...</p>
 
@@ -319,7 +319,7 @@ export default class Joblist extends React.Component{
                                 <Typography component="h1" variant="h5">
                                     Pick Car up at ...
                                 </Typography>
-                                <Box component="form" noValidate sx={{ mt: 1 }}>
+                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
                                     Address:
                                     <br/>
                                     {this.state.hub}
@@ -393,7 +393,7 @@ export default class Joblist extends React.Component{
                                     Park the Car ...
                                 </Typography>
                                 Additional Note for Location:
-                                <Box component="form" noValidate sx={{ mt: 1 }}>
+                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
                                     <TextField
                                         margin="normal"
                                         required
@@ -461,7 +461,7 @@ export default class Joblist extends React.Component{
                                 <Typography component="h1" variant="h5">
                                     Drop Key Off at ...
                                 </Typography>
-                                <Box component="form" noValidate sx={{ mt: 1 }}>
+                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
                                     Address:
                                     <br/>
                                     {this.state.hub}
@@ -479,14 +479,6 @@ export default class Joblist extends React.Component{
                                     >
                                         Confirm
                                     </Button>
-                                    {/*<Button*/}
-                                    {/*    onClick={this.handleBackClick}*/}
-                                    {/*    fullWidth*/}
-                                    {/*    variant="contained"*/}
-                                    {/*    sx={{ mt: 3, mb: 2 }}*/}
-                                    {/*>*/}
-                                    {/*    Back*/}
-                                    {/*</Button>*/}
                                 </Box>
                             </Box>
                         </Grid>
