@@ -202,7 +202,7 @@ export default class DropoffSchedule extends React.Component{
                             />
                         </div>
                         <div style={{display: 'flex',  justifyContent:'center'}}>
-                            <Map center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd} chosen_lat={this.state.chosen_lat} chosen_lng={this.state.chosen_lng}/>
+                            <Map data-testid="schedule-map" center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd} chosen_lat={this.state.chosen_lat} chosen_lng={this.state.chosen_lng}/>
                         </div>
                     </Grid>
                     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -219,7 +219,7 @@ export default class DropoffSchedule extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Schedule Drop Off
                             </Typography>
-                            <Box component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     <TextField
                                         margin="normal"
