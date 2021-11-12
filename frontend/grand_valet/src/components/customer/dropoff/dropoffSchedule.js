@@ -193,7 +193,7 @@ export default class DropoffSchedule extends React.Component{
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"40%"}}>
+                        <div data-testid="schedule-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"40%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={table_data}
