@@ -259,6 +259,22 @@ class Database {
         });
     }
 
+    /**
+     * Reads the active job assigned with a customer.
+     * @param {string} username - Username of the requested customer.
+     * @returns {Job[]} - JSON of the active job associated with the customer.
+     */
+     static read_customerJob(username, next) {
+        return Database.db('GrandValet').collection('Jobs').findOne({$and: [{customerUsername: username}, { status : { $ne :  13}}]})
+        .then((job) => {
+            if (job == null) 
+            {
+                return null;
+            }
+            return job;
+        });
+    }
+
     // TODO: Potential problem in time zone
     // TODO: Does not return immediate update
     /**
