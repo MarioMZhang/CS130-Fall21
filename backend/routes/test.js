@@ -172,4 +172,13 @@ router.get('/assignJobLater', function(req, res, next) {
 
 })
 
+router.get('/customerJob', function(req, res, next) {
+	res.status(200);
+    grandValet.Database.read_customerJob("smarsh")
+    .then((job) => {
+        res.send(job);
+    })
+
+})
+
 module.exports = router;
