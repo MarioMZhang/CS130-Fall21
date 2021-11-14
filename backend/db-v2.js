@@ -186,6 +186,9 @@ class Database {
      */
      static schedule_jobs(next) {
         let currentTime = new Date().getTime();
+        let max = 1000000;
+        let min = 100000;
+        let randCode = Math.floor(Math.random() * (max - min) + min);
         let query1 = {
             $and:[
                 {$or: [{ status : 1 }, { status : 6 }]},
@@ -200,8 +203,7 @@ class Database {
                     { type : 2 },
                     { driverStatus : 1 }
                 ]
-            };    
-            
+            }; 
             for (let jobToBeAssigned of jobsToBeAssigned) {
                 //console.log('should not be here');
                 Database.db('GrandValet').collection('Users').aggregate([
@@ -232,7 +234,7 @@ class Database {
                     if (driversAvailable.length > 0)
                     {
                         let assignedDriver = driversAvailable[0].username;
-                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver, status: jobToBeAssigned.status+1 }});
+                        Database.db('GrandValet').collection('Jobs').updateOne({jobId: jobToBeAssigned.jobId}, { $set: {driverUsername: assignedDriver, status: jobToBeAssigned.status+1, code: randCode }});
                     }
                 })
             }
