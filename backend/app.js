@@ -10,8 +10,8 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var loginRouter = require("./routes/login");
 var apiHubsRouter = require("./routes/api-hubs");
+var apiJobsRouter = require("./routes/api-jobs");
 var testRouter = require("./routes/test");
-// var apiJobsRouter = require("./routes/api-jobs");
 
 var app = express();
 
@@ -31,6 +31,7 @@ dbv2.Database.connect((err) => {
 		app.use('/', indexRouter);
 		app.use('/login', loginRouter);
 		app.use('/api', apiHubsRouter);
+		app.use('/api', apiJobsRouter);
 		app.use('/test', testRouter);
 
 		// catch 404 and forward to error handler
