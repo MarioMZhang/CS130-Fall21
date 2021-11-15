@@ -311,7 +311,7 @@ class Database {
                 let newData = {type: body.type, jobId: body.jobId, scheduledTime: body.scheduledTime, status: body.status, licenceState: body.licenceState,
                     licenceNum: body.licenceNum, code: body.code, hubId: body.hubId, carLocation: body.carLocation, note: body.note,
                     driverUsername: body.driverUsername, customerUsername: body.customerUsername, advanceState: body.advanceState};
-                Database.db('GrandValet').collection('Meta').updateOne({}, { $set: {maxJobId: body.JobId}});
+                Database.db('GrandValet').collection('Meta').updateOne({}, { $set: {maxJobId: body.jobId}});
                 Database.db('GrandValet').collection('Jobs').insertOne(newData);
                 return;
             }
