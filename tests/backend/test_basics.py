@@ -15,11 +15,6 @@ class TestBasics(unittest.TestCase):
         self.assertEqual(r.status_code, 200)
         self.assertTrue(len(r.json()) > 0)
 
-    # def test_jobs(self):
-    #     r = requests.get(SERVER + '/api/jobs')
-    #     self.assertEqual(r.status_code, 200)
-    #     print(r.json)
-
 
 if __name__ == '__main__':
     unittest.main()
