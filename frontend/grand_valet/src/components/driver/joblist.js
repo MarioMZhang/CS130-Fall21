@@ -701,6 +701,7 @@ export default class Joblist extends React.Component{
                     inBreak: true
                 });
             }
+            // Timer
         }
 
         return this.handleDropOff();
