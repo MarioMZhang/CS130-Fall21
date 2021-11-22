@@ -64,9 +64,11 @@ const table_columns = [
 ];
 
 var job_data = [
-    {type: 1, id: 1, scheduledTime: 1635313499, status: 0, licenceState: "co", licenceNum: "CABD12", hubId: 1, code: 132561, carLocation: null, note: null, driverUsername: null, customerUsername: "smarsh", advanceState: [0,0]},
-    {type: 1, id: 2, scheduledTime: 1554423678, status: 0, licenceState: "ca", licenceNum: "CA823YU", hubId: 2, code: 123456, carLocation: null, note: null, driverUsername: null, customerUsername: "jack", advanceState: [0,0]},
-    {type: 1, id: 3, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 113344, carLocation: null, note: null, driverUsername: null, customerUsername: "mike", advanceState: [0,0]},
+    // {type: 1, id: 1, scheduledTime: 1635313499, status: 0, licenceState: "co", licenceNum: "CABD12", hubId: 1, code: 132561, carLocation: null, note: null, driverUsername: null, customerUsername: "smarsh", advanceState: [0,0]},
+    // {type: 1, id: 2, scheduledTime: 1554423678, status: 0, licenceState: "ca", licenceNum: "CA823YU", hubId: 2, code: 123456, carLocation: null, note: null, driverUsername: null, customerUsername: "jack", advanceState: [0,0]},
+    // {type: 1, id: 3, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 113344, carLocation: null, note: null, driverUsername: null, customerUsername: "mike", advanceState: [0,0]},{type: 1, id: 1, scheduledTime: 1635313499, status: 0, licenceState: "co", licenceNum: "CABD12", hubId: 1, code: 132561, carLocation: null, note: null, driverUsername: null, customerUsername: "smarsh", advanceState: [0,0]},
+    // {type: 1, id: 2, scheduledTime: 1554423678, status: 0, licenceState: "ca", licenceNum: "CA823YU", hubId: 2, code: 123456, carLocation: null, note: null, driverUsername: null, customerUsername: "jack", advanceState: [0,0]},
+    // {type: 1, id: 3, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 113344, carLocation: null, note: null, driverUsername: null, customerUsername: "mike", advanceState: [0,0]},
     {type: 2, id: 4, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 234411, carLocation: null, note: "at the front door", driverUsername: null, customerUsername: "adam", advanceState: [0,0]}
 ]
 var hub_data = [
@@ -113,14 +115,25 @@ export default class Joblist extends React.Component{
         };
         return obj;
     }
-    
+    componentWillReceiveProps(nextProps) {
+        console.log('componentWillReceiveProps', nextProps);
+    }
+
     componentDidMount() {
+        console.log("mounting!")
         let timeLeftVar = this.secondsToTime(this.state.seconds);
         this.setState({ time: timeLeftVar });
+        if (this.state.inBreak || (this.state.scheduleBreak && job_data.length === 0)) {
+            if (!this.state.inBreak) {
+                this.setState({
+                    inBreak: true
+                });
+            }
+        }
     }
     
     startTimer() {
-        if (this.timer == 0 && this.state.seconds > 0) {
+        if (this.timer === 0 && this.state.seconds > 0) {
             this.timer = setInterval(this.countDown, 1000);
         }
     }
@@ -154,6 +167,7 @@ export default class Joblist extends React.Component{
         this.setState({
             tempBreakLength: e.target.value,
         });
+        console.log("tempBreakLength: "+e.target.value);
     }
 
     handleBreak = () => {
@@ -661,7 +675,7 @@ export default class Joblist extends React.Component{
                                         value={this.state.carLocNote}
                                         onChange={(event) => this.handleTextField(event.target.value)}
                                         autoFocus
-                                        disabled="True"
+                                        disabled="disabled"
                                     />
                                     {/*<p>{this.state.carLocNote}</p>*/}
                                     <br/>
@@ -749,19 +763,15 @@ export default class Joblist extends React.Component{
 
     render(){
         console.log("current status")
+        console.log(this.props);
         console.log(this.state.status);
-        if (this.state.inBreak || (this.state.scheduleBreak && job_data.length === 0)) {
-            if (!this.state.inBreak) {
-                this.setState({
-                    inBreak: true
-                });
-            }
-            else if (this.seconds > 0) {
-                return this.handleInBreak();
-            }
+        console.log(this.state.tempBreakLength);
+        console.log("inBreak? "+this.state.inBreak);
+        if (this.state.inBreak) {
+            return this.handleInBreak();
         }
+        else {return this.handleDropOff();}
 
-        return this.handleDropOff();
 
     }
 }
