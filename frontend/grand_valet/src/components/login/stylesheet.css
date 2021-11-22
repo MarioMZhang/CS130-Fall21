@@ -1,4 +1,52 @@
-.logo {
-    width: 100%;
-    height: 90%;
+@media (prefers-reduced-motion: no-preference) {
+    
+    .logo {
+        width: 100%;
+        height: 100%;
+        animation-name:  logo-ani;
+        animation-duration: 0.25s;
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: forwards;
+    }
+}
+
+.img{
+    position: center middle;
+}
+
+/* for animation of car image under the right 
+side of the page */
+
+@media (prefers-reduced-motion: no-preference) {
+
+    .MuiPaper-root.MuiPaper-elevation.MuiPaper-elevation6.MuiGrid-root.MuiGrid-item.MuiGrid-grid-xs-12.MuiGrid-grid-sm-8.MuiGrid-grid-md-5.css-hmoegs-MuiPaper-root-MuiGrid-root{
+        background-image: url('./images/car1.jpg');
+        background-size: 500px;
+        background-repeat: no-repeat;
+        background-position: center bottom;
+        padding-bottom: 100px;
+        opacity: 0.8;
+        animation-name:  car-ani;
+        animation-duration: 0.25s;
+        animation-timing-function: ease-in-out;
+        animation-fill-mode: forwards;
+    }
+}
+
+@keyframes car-ani{
+    from{
+        background-position: right bottom;
+    };
+    to{
+        background-position:  center bottom;
+    };
+}
+
+@keyframes logo-ani{
+    from{
+        opcaity: 0;
+    };
+    to{
+        opacity: 1;
+    };
 }

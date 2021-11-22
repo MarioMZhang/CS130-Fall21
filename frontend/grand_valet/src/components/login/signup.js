@@ -14,6 +14,7 @@ import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import Dropdown from 'react-dropdown';
 import 'react-dropdown/style.css';
+import './signup.css';
 
 const signupOptions = [
     'User', 'Partner'
