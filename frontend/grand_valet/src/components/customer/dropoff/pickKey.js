@@ -94,7 +94,7 @@ function errors(err) {
 }
 
 
-export default class DropoffIP extends React.Component{
+export default class PickCar extends React.Component{
     // el = React.createRef();
     // tabulator = null; //variable to hold your table
 
@@ -108,6 +108,7 @@ export default class DropoffIP extends React.Component{
             chosen_lat: null,
             chosen_lng: null,
             code: 0,
+            address: "Somewhere in LA"
         };
     }
 
@@ -211,9 +212,12 @@ export default class DropoffIP extends React.Component{
                             }}
                         >
                             <Typography component="h1" variant="h5">
-                                Drop off in progress
+                                Pick key up
                             </Typography>
                             <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                                Address: <br></br>
+                                {this.state.address}<br></br>
+                                <br></br>
                                 Verification code:
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     
@@ -237,15 +241,6 @@ export default class DropoffIP extends React.Component{
                                 >
                                     Confirm
                                 </Button>
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{ mt: 3, mb: 2 }}
-                                >
-                                    Cancel
-                                </Button>
-
                             </Box>
                         </Box>
                     </Grid>
