@@ -94,7 +94,7 @@ function errors(err) {
 }
 
 
-export default class DropoffIP extends React.Component{
+export default class TakeCar extends React.Component{
     // el = React.createRef();
     // tabulator = null; //variable to hold your table
 
@@ -107,7 +107,10 @@ export default class DropoffIP extends React.Component{
             chosen_hub: null,
             chosen_lat: null,
             chosen_lng: null,
+            car_lat: null,
+            car_lng: null,
             code: 0,
+            note: 'Somewhere in a parking lot'
         };
     }
 
@@ -169,6 +172,7 @@ export default class DropoffIP extends React.Component{
         // }
 
         marker_crd.push({lat: this.state.chosen_lat, lng: this.state.chosen_lng});
+        marker_crd.push({lat: this.state.car_lat, lng: this.state.car_lng});
 
         this.setState({
             marker_crd: marker_crd
@@ -211,24 +215,11 @@ export default class DropoffIP extends React.Component{
                             }}
                         >
                             <Typography component="h1" variant="h5">
-                                Drop off in progress
+                                Take car out
                             </Typography>
                             <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
-                                Verification code:
-                                <div style={{display:"flex", flexDirection:"row"}}>
-                                    
-                                    <TextField
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        name="code"
-                                        id="code"
-                                        autoFocus
-                                        style={{padding:5}}
-                                        disabled
-                                        defaultValue={this.state.code}
-                                    />
-                                </div>
+                                Note for location: <br></br>
+                                {this.state.note}
                                 <Button
                                     type="submit"
                                     fullWidth
@@ -237,15 +228,6 @@ export default class DropoffIP extends React.Component{
                                 >
                                     Confirm
                                 </Button>
-                                <Button
-                                    type="submit"
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{ mt: 3, mb: 2 }}
-                                >
-                                    Cancel
-                                </Button>
-
                             </Box>
                         </Box>
                     </Grid>

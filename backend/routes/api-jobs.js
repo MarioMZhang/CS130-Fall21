@@ -308,8 +308,10 @@ router.post('/jobs',function(req, res, next) {
     } 
 
     else {
+
         // State 2
         if (jobstatus==2) {
+
             GrandValet.Database.read_job(jobid).then((job) => {
                 let new_entry = {};
                 new_entry.jobId = jobid;
@@ -325,15 +327,18 @@ router.post('/jobs',function(req, res, next) {
                 new_entry.driverUsername = job.driverUsername;
                 new_entry.customerUsername = job.customerUsername;
                 new_entry.advanceState = job.advanceState;
-                if (jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) {
+                if ((jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) && (jobadvancestate[1] == 1 || new_entry.advanceState[1] == 1)) {
+                    new_entry.status = 3;
                     new_entry.advanceState[0] = 1;
-                }
-                if (jobadvancestate[1] == 1 || new_entry.advanceState[1] == 1) {
                     new_entry.advanceState[1] = 1;
                 }
-                if (new_entry.advanceState[0] == 1 && new_entry.advanceState[1] == 1) {
-                    new_entry.status == new_entry.status + 1;
+                else if (jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) {
+                    new_entry.advanceState[0] = 1;
                 }
+                else if (jobadvancestate[1] == 1 || new_entry.advanceState[1] == 1) {
+                    new_entry.advanceState[1] = 1;
+                }
+
                 GrandValet.Database.store_job(new_entry).then(() => {
                     // get again and return
                     GrandValet.Database.read_job(new_entry.jobId).then((result)=>{
@@ -604,14 +609,16 @@ router.post('/jobs',function(req, res, next) {
                 new_entry.driverUsername = job.driverUsername;
                 new_entry.customerUsername = job.customerUsername;
                 new_entry.advanceState = job.advanceState;
-                if (jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) {
+                if ((jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) && (jobadvancestate[1] == 1 || new_entry.advanceState[1] == 1)) {
+                    new_entry.status = 13;
                     new_entry.advanceState[0] = 1;
-                }
-                if (jobadvancestate[1] == 1 || new_entry.advanceState[1] == 1) {
                     new_entry.advanceState[1] = 1;
                 }
-                if (new_entry.advanceState[0] == 1 && new_entry.advanceState[1] == 1) {
-                    new_entry.status == 13;
+                else if (jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) {
+                    new_entry.advanceState[0] = 1;
+                }
+                else if (jobadvancestate[1] == 1 || new_entry.advanceState[1] == 1) {
+                    new_entry.advanceState[1] = 1;
                 }
                 GrandValet.Database.store_job(new_entry).then(() => {
                     // get again and return
