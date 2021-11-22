@@ -14,7 +14,8 @@ import Typography from '@mui/material/Typography';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
-import Map from './../../util/map';
+import Map from './../../util/map'
+import {HTTPHandler} from './../../util/http';
 
 
 // import TimePicker from 'react-time-picker';
@@ -144,6 +145,13 @@ export default class DropoffSchedule extends React.Component{
     componentDidMount() {
         // retrieve list of hubs.
         // convert response body into table data.
+
+
+
+        console.log("abc");
+        let handler = new HTTPHandler();
+        handler.asyncGetHubs()
+            .then(hubs => console.log(hubs));
 
         if (navigator.geolocation) {
             navigator.permissions
