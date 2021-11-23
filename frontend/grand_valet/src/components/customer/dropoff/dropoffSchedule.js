@@ -1,4 +1,4 @@
-import React from "react";
+import React, {createRef} from "react";
 import './dropoffSChedule.css';
 import 'react-tabulator/lib/styles.css';
 import { ReactTabulator } from 'react-tabulator'
@@ -16,9 +16,8 @@ import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map'
 import {HTTPHandler} from './../../util/http';
+import $ from "jquery";
 
-
-// import TimePicker from 'react-time-picker';
 
 
 
@@ -26,8 +25,6 @@ import {HTTPHandler} from './../../util/http';
 
 
 const theme = createTheme();
-
-const state_options = ["California", "New York"];
 
 
 const dummyHubs = [
@@ -55,19 +52,19 @@ const table_columns = [
     { title: "ID", field: "id"},
     { title: "Description", field: "Description"},
     { title: "Distance", field: "Distance" },
-    { title: "Spots", field: "Spots"},
+    // { title: "Spots", field: "Spots"},
     { title: "Open Time", field:"Opentime" },
     { title: "Close Time", field:"Closetime" },
-    { title: "Availability", field: "Available", align: "center", formatter: "tickCross" }
+    // { title: "Availability", field: "Available", align: "center", formatter: "tickCross" }
 ];
 
-var table_data = [
-    {id:1, Description:"South of UCLA", Distance: 3.5, Spots: 7, Opentime: 12512313, Closetime: 12333333, Available: true, longitude: -118.462, latitude: 34.0689},
-    {id:2, Description:"Westwood", Distance: 13.5, Spots: 1, Opentime: 12512313, Closetime: 12333333, Available: true,  longitude: -118.39, latitude: 34.2},
-    {id:3, Description:"Target", Distance: 1.2, Spots: 0, Opentime: 12512313, Closetime: 12333333, Available: false, longitude: -118.482, latitude: 34.092},
-    {id:4, Description:"Hammer Museum", Distance: 5.9, Spots: 12, Opentime: 12512313, Closetime: 12333333, Available: true, longitude: -118.410, latitude: 34.0633},
-    {id:5, Description:"Wilshire", Distance: 4.6, Spots: 9, Opentime: 12512313, Closetime: 12333333, Available: false, longitude: -118.45, latitude: 34.0591},
-];
+// var table_data = [
+//     {id:1, Description:"South of UCLA", Distance: 3.5, Spots: 7, Opentime: 12512313, Closetime: 12333333, Available: true, longitude: -118.462, latitude: 34.0689},
+//     {id:2, Description:"Westwood", Distance: 13.5, Spots: 1, Opentime: 12512313, Closetime: 12333333, Available: true,  longitude: -118.39, latitude: 34.2},
+//     {id:3, Description:"Target", Distance: 1.2, Spots: 0, Opentime: 12512313, Closetime: 12333333, Available: false, longitude: -118.482, latitude: 34.092},
+//     {id:4, Description:"Hammer Museum", Distance: 5.9, Spots: 12, Opentime: 12512313, Closetime: 12333333, Available: true, longitude: -118.410, latitude: 34.0633},
+//     {id:5, Description:"Wilshire", Distance: 4.6, Spots: 9, Opentime: 12512313, Closetime: 12333333, Available: false, longitude: -118.45, latitude: 34.0591},
+// ];
 
 var options = {
     enableHighAccuracy: true,
@@ -75,23 +72,30 @@ var options = {
     maximumAge: 0,
 };
 
-
-// The function used to periodically get available hubs.
-function getHubs() {
-
-}
-
-// The function used to convert the HTTP response body (dummyHubs) into the correct format (table_column, table_data).
-function convertHubList() {
-
-
-
-    return dummyHubs;
-}
-
-
 function errors(err) {
     console.warn(`ERROR(${err.code}): ${err.message}`);
+}
+
+
+function getDistanceFromLatLonInKm(lat1, lon1, lat2, lon2) {
+    console.log(lat1, lon1, lat2, lon2);
+    var R = 6371; // Radius of the earth in km
+    var dLat = deg2rad(lat2-lat1);  // deg2rad below
+    var dLon = deg2rad(lon2-lon1);
+    var a =
+        Math.sin(dLat/2) * Math.sin(dLat/2) +
+        Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+        Math.sin(dLon/2) * Math.sin(dLon/2)
+    ;
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    var d = R * c; // Distance in km
+
+    console.log(d);
+    return Number(d.toPrecision(3));
+}
+
+function deg2rad(deg) {
+    return deg * (Math.PI/180)
 }
 
 
@@ -104,14 +108,25 @@ export default class DropoffSchedule extends React.Component{
         this.state = {
             user_lat: 0,
             user_lng: 0,
+            table_ref: createRef(),
             marker_crd: null,
             chosen_hub: null,
             chosen_lat: null,
             chosen_lng: null,
+            table_data: []
         };
     }
 
-
+    handleSubmit = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        console.log({
+            license: data.get('license'),
+            state: data.get('issuedState'),
+            hour: data.get('hour'),
+            minute: data.get('minute')
+        });
+    };
 
     setUserLocation = (pos) => {
         var crd = pos.coords;
@@ -120,15 +135,13 @@ export default class DropoffSchedule extends React.Component{
             user_lat: crd.latitude,
             user_lng: crd.longitude,
         });
-
-        console.log(crd.latitude);
-        console.log(crd.longitude);
     };
 
 
     tableRowClicked = (e, row) => {
-        console.log(row._row.data);
         var data = row._row.data;
+
+        console.log(data.latitude);
 
         this.setState({
             chosen_hub: {
@@ -141,44 +154,109 @@ export default class DropoffSchedule extends React.Component{
         });
     };
 
+    updateTable = () => {
+        let handler = new HTTPHandler();
+        handler.asyncGetHubs()
+            .then(hubs => {
+                var res = [];
+
+                for (let i = 0; i < hubs.length; i ++) {
+                    const cur = hubs[i];
+                    var temp = {
+                        id: cur.hubId,
+                        Description: cur.description,
+                        Distance: getDistanceFromLatLonInKm(cur.location[1], cur.location[0], this.state.user_lat, this.state.user_lng),
+                        Opentime: new Date(cur.startTime * 1000).toTimeString(),
+                        Closetime: new Date(cur.endTime * 1000).toTimeString(),
+                        latitude: cur.location[1],
+                        longitude: cur.location[0]
+                    };
+                    res.push(temp);
+                }
+
+                this.setState({table_data: res});
+
+                var marker_crd = [];
+
+                for (let i = 0; i < this.state.table_data.length; i ++) {
+                    marker_crd.push({lat: this.state.table_data[i].latitude, lng: this.state.table_data[i].longitude});
+                }
+
+                this.setState({
+                    marker_crd: marker_crd
+                })
+            });
+    };
+
+    componentDidUpdate(prevProps, prevState, snapshot) {
+        this.updateTable();
+    }
+
+    shouldComponentUpdate(nextProps, nextState, nextContext) {
+        if (this.state.user_lat === nextState.user_lat && this.state.chosen_lat === nextState.chosen_lat) {
+            this.state.table_ref.current.table.replaceData(this.state.table_data);
+            return false;
+        }
+
+        return true;
+    }
+
 
     componentDidMount() {
         // retrieve list of hubs.
         // convert response body into table data.
 
 
-
-        console.log("abc");
-        let handler = new HTTPHandler();
-        handler.asyncGetHubs()
-            .then(hubs => console.log(hubs));
-
         if (navigator.geolocation) {
             navigator.permissions
                 .query({ name: "geolocation" })
                 .then((result) => {
                     if (result.state === "granted") {
-                        console.log(result.state);
                         navigator.geolocation.getCurrentPosition(this.setUserLocation);
                     } else if (result.state === "prompt") {
-                        console.log(result.state);
                         navigator.geolocation.getCurrentPosition(this.setUserLocation, errors, options);
                     } else if (result.state === "denied") {
                         window.alert("Please enable geolocation!!");
                     }
-                });
+                })
+                .then(() => {
+                    this.updateTable();
+                })
         }
 
-        var marker_crd = [];
 
-        for (let i = 0; i < table_data.length; i ++) {
-            marker_crd.push({lat: table_data[i].latitude, lng: table_data[i].longitude});
-        }
 
-        this.setState({
-            marker_crd: marker_crd
-        })
-
+        // let handler = new HTTPHandler();
+        // handler.asyncGetHubs()
+        //     .then(hubs => {
+        //         var res = [];
+        //
+        //         for (let i = 0; i < hubs.length; i ++) {
+        //             const cur = hubs[i];
+        //             var temp = {
+        //                 id: cur.hubId,
+        //                 Description: cur.description,
+        //                 Distance: getDistanceFromLatLonInKm(cur.location[1], cur.location[0], this.state.user_lng, this.state.user_lat),
+        //                 Opentime: new Date(cur.startTime * 1000).toString(),
+        //                 Closetime: new Date(cur.endTime * 1000).toString(),
+        //                 latitude: cur.location[1],
+        //                 longitude: cur.location[0]
+        //             };
+        //             res.push(temp);
+        //         }
+        //
+        //         this.setState({table_data: res});
+        //
+        //         var marker_crd = [];
+        //
+        //         for (let i = 0; i < this.state.table_data.length; i ++) {
+        //             marker_crd.push({lat: this.state.table_data[i].latitude, lng: this.state.table_data[i].longitude});
+        //         }
+        //
+        //         this.setState({
+        //             marker_crd: marker_crd
+        //         })
+        //     });
     }
 
     //add table holder element to DOM
@@ -203,9 +281,11 @@ export default class DropoffSchedule extends React.Component{
                     >
                         <div data-testid="schedule-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"40%"}}>
                             <ReactTabulator
+                                ref={this.state.table_ref}
                                 columns={table_columns}
-                                data={table_data}
+                                data={this.state.table_data}
                                 rowClick={this.tableRowClicked}
+                                layout="fitDataFill"
                                 className="hubClass"
                             />
                         </div>
@@ -227,7 +307,7 @@ export default class DropoffSchedule extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Schedule Drop Off
                             </Typography>
-                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" component="form" onSubmit={this.handleSubmit}noValidate sx={{ mt: 1 }} >
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     <TextField
                                         margin="normal"
