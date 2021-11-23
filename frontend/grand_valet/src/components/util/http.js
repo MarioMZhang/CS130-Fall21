@@ -66,5 +66,4 @@ export class HTTPHandler {
                 .catch(err => console.log(err.toString()));
         });
     }
-
 }
