@@ -14,12 +14,9 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import {HTTPHandler} from './../util/http';
 
-// function SimpleButton(props) {
-//     const rowData = props.cell._cell.row.data;
-//     const cellValue = props.cell._cell.value || "Confirm";
-//     return <button onClick={() => alert(rowData.name)}>{cellValue}</button>;
-// }
+
 
 var fake_job = [
     {
@@ -63,21 +60,6 @@ const table_columns = [
 
 ];
 
-var job_data = [
-    // {type: 1, id: 1, scheduledTime: 1635313499, status: 0, licenceState: "co", licenceNum: "CABD12", hubId: 1, code: 132561, carLocation: null, note: null, driverUsername: null, customerUsername: "smarsh", advanceState: [0,0]},
-    // {type: 1, id: 2, scheduledTime: 1554423678, status: 0, licenceState: "ca", licenceNum: "CA823YU", hubId: 2, code: 123456, carLocation: null, note: null, driverUsername: null, customerUsername: "jack", advanceState: [0,0]},
-    // {type: 1, id: 3, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 113344, carLocation: null, note: null, driverUsername: null, customerUsername: "mike", advanceState: [0,0]},{type: 1, id: 1, scheduledTime: 1635313499, status: 0, licenceState: "co", licenceNum: "CABD12", hubId: 1, code: 132561, carLocation: null, note: null, driverUsername: null, customerUsername: "smarsh", advanceState: [0,0]},
-    // {type: 1, id: 2, scheduledTime: 1554423678, status: 0, licenceState: "ca", licenceNum: "CA823YU", hubId: 2, code: 123456, carLocation: null, note: null, driverUsername: null, customerUsername: "jack", advanceState: [0,0]},
-    // {type: 1, id: 3, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 113344, carLocation: null, note: null, driverUsername: null, customerUsername: "mike", advanceState: [0,0]},
-    {type: 2, id: 4, scheduledTime: 1635313499, status: 0, licenceState: "ny", licenceNum: "89SFD21", hubId: 3, code: 234411, carLocation: null, note: "at the front door", driverUsername: null, customerUsername: "adam", advanceState: [0,0]}
-]
-var hub_data = [
-    {id:1, Description:"South of UCLA", Distance: 3.5, Spots: 7, Opentime: 12512313, Closetime: 12333333, Available: true},
-    {id:2, Description:"Westwood", Distance: 13.5, Spots: 1, Opentime: 12512313, Closetime: 12333333, Available: true},
-    {id:3, Description:"Target", Distance: 1.2, Spots: 0, Opentime: 12512313, Closetime: 12333333, Available: false},
-    {id:4, Description:"Hammer Museum", Distance: 5.9, Spots: 12, Opentime: 12512313, Closetime: 12333333, Available: true},
-    {id:5, Description:"Wilshire", Distance: 4.6, Spots: 9, Opentime: 12512313, Closetime: 12333333, Available: false},
-];
 
 export default class Joblist extends React.Component{
 
@@ -95,7 +77,9 @@ export default class Joblist extends React.Component{
             tempBreakLength: 10,
             inBreak: false,
             time: {},
-            seconds: 0
+            seconds: 0,
+            job_data: [],
+            hub_data: []
         };
     }
 
@@ -115,15 +99,65 @@ export default class Joblist extends React.Component{
         };
         return obj;
     }
-    componentWillReceiveProps(nextProps) {
-        console.log('componentWillReceiveProps', nextProps);
-    }
+
+    updateHubs = () => {
+        let handler = new HTTPHandler();
+        handler.asyncGetHubs()
+            .then(hubs => {
+                var res = [];
+
+                for (let i = 0; i < hubs.length; i ++) {
+                    const cur = hubs[i];
+                    var temp = {
+                        id: cur.hubId,
+                        Description: cur.description,
+                        // Distance: getDistanceFromLatLonInKm(cur.location[1], cur.location[0], this.state.user_lat, this.state.user_lng),
+                        Opentime: new Date(cur.startTime * 1000).toTimeString(),
+                        Closetime: new Date(cur.endTime * 1000).toTimeString(),
+                        latitude: cur.location[1],
+                        longitude: cur.location[0]
+                    };
+                    res.push(temp);
+                }
+
+                this.setState({hub_data: res});
+            });
+    };
+
+    updateJoblist = () => {
+        let handler = new HTTPHandler();
+        handler.asyncGetDriverJobs("driver1")
+            .then(jobs => {
+                var res = [];
+
+                for (let i = 0; i < jobs.length; i ++) {
+                    const cur = jobs[i];
+                    var temp = {
+                        type: cur.type,
+                        id: cur.jobId,
+                        scheduledTime: new Date(cur.scheduledTime * 1000).toTimeString().substring(0,8),
+                        licenceState: cur.licenceState,
+                        licenceNum: cur.licenceNum,
+                        hubId: cur.hubId,
+                        code: cur.code,
+                        status: cur.status
+                    };
+                    res.push(temp);
+                }
+                // console.log(res);
+                this.setState({job_data: res});
+
+            });
+    };
 
     componentDidMount() {
-        console.log("mounting!")
+        console.log("mounting!");
+        this.updateJoblist();
+        this.updateHubs();
+
         let timeLeftVar = this.secondsToTime(this.state.seconds);
         this.setState({ time: timeLeftVar });
-        if (this.state.inBreak || (this.state.scheduleBreak && job_data.length === 0)) {
+        if (this.state.inBreak || (this.state.scheduleBreak && this.state.job_data.length === 0)) {
             if (!this.state.inBreak) {
                 this.setState({
                     inBreak: true
@@ -186,11 +220,6 @@ export default class Joblist extends React.Component{
     }
     handleBackClick = () => {
         console.log("handle back click");
-        // for (var i = 0; i < job_data.length; i++) {
-        //     if (job_data[i].id === this.state.id) {
-        //         job_data[i].status = this.state.status;
-        //     }
-        // }
         this.setState({
             type:0,
             id: -1,
@@ -201,9 +230,9 @@ export default class Joblist extends React.Component{
     }
     handleParkConfirm = () => {
         console.log("save notes for car location");
-        for (var i = 0; i < job_data.length; i++) {
-            if (job_data[i].id === this.state.id) {
-                job_data[i].carLocation = this.state.carLocNote;
+        for (var i = 0; i < this.state.job_data.length; i++) {
+            if (this.state.job_data[i].id === this.state.id) {
+                this.state.job_data[i].carLocation = this.state.carLocNote;
             }
         }
         console.log(this.state.carLocNote);
@@ -216,11 +245,11 @@ export default class Joblist extends React.Component{
 
     handleKeyConfirm = () => {
         console.log("handle key confirm");
-        for (var i = 0; i < job_data.length; i++) {
-            if (job_data[i].id === this.state.id) {
-                job_data[i].status = this.state.status + 1; // job is done TODO: change to API
-                job_data[i].driverUsername = "Guy";
-                job_data.splice(i, 1);
+        for (var i = 0; i < this.state.job_data.length; i++) {
+            if (this.state.job_data[i].id === this.state.id) {
+                this.state.job_data[i].status = this.state.status + 1; // job is done TODO: change to API
+                this.state.job_data[i].driverUsername = "Guy";
+                this.state.job_data.splice(i, 1);
             }
         }
         this.setState({
@@ -245,9 +274,9 @@ export default class Joblist extends React.Component{
         var data = row._row.data;
         var hub = data.hubId
         var dpt = null;
-        for (var i = 0; i < hub_data.length; i++) {
-            if (hub_data[i].id === hub) {
-                dpt = hub_data[i].Description
+        for (var i = 0; i < this.state.hub_data.length; i++) {
+            if (this.state.hub_data[i].id === hub) {
+                dpt = this.state.hub_data[i].Description
             }
         }
         this.setState({
@@ -273,8 +302,6 @@ export default class Joblist extends React.Component{
                             md={7}
                             sx={{
                                 backgroundRepeat: 'no-repeat',
-                                // backgroundColor: (t) =>
-                                //     t.palette.mode === 'light' ? t.palette.grey[50] : t.palette.grey[900],
                                 backgroundSize: 'cover',
                                 backgroundPosition: 'center',
                             }}
@@ -282,7 +309,7 @@ export default class Joblist extends React.Component{
                             <div data-testid="test-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
-                                    data={job_data}
+                                    data={this.state.job_data}
                                     hub={this.state.hub}
                                     rowClick={this.tableRowClicked}
                                     className="jobClass"
@@ -344,76 +371,7 @@ export default class Joblist extends React.Component{
             );
         }
         else if (this.state.status === 0 && this.state.type === 1) {
-            return(
-                <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
-                        <CssBaseline />
-                        <Grid
-                            item
-                            xs={false}
-                            sm={4}
-                            md={7}
-                            sx={{
-                                backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }}
-                        >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
-                                <ReactTabulator
-                                    columns={table_columns}
-                                    data={job_data}
-                                    rowClick={this.tableRowClicked}
-                                    className="jobClass"
-                                />
-                            </div>
-                            {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                            <Box
-                                sx={{
-                                    my: 8,
-                                    mx: 4,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Typography component="h1" variant="h5">
-                                    Pick Car up at ...
-                                </Typography>
-                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                    Address:
-                                    <br/>
-                                    {this.state.hub}
-                                    <br/>
-                                    <br/>
-                                    Verification Code:
-                                    <br/>
-                                    {this.state.code}
-                                    <br/>
-                                    <Button
-                                        onClick={this.handleConfirm}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        Confirm
-                                    </Button>
-                                    <Button
-                                        onClick={this.handleBackClick}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        Back
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </ThemeProvider>
-            );
+
 
         }
         else if (this.state.status === 1 && this.state.type === 1) {
@@ -435,7 +393,7 @@ export default class Joblist extends React.Component{
                             <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
-                                    data={job_data}
+                                    data={this.state.job_data}
                                     rowClick={this.tableRowClicked}
                                     className="jobClass"
                                 />
@@ -504,7 +462,7 @@ export default class Joblist extends React.Component{
                             <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
-                                    data={job_data}
+                                    data={this.state.job_data}
                                     rowClick={this.tableRowClicked}
                                     className="jobClass"
                                 />
@@ -569,7 +527,7 @@ export default class Joblist extends React.Component{
                             <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
-                                    data={job_data}
+                                    data={this.state.job_data}
                                     rowClick={this.tableRowClicked}
                                     className="jobClass"
                                 />
@@ -642,7 +600,7 @@ export default class Joblist extends React.Component{
                             <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
-                                    data={job_data}
+                                    data={this.state.job_data}
                                     rowClick={this.tableRowClicked}
                                     className="jobClass"
                                 />
@@ -675,7 +633,7 @@ export default class Joblist extends React.Component{
                                         value={this.state.carLocNote}
                                         onChange={(event) => this.handleTextField(event.target.value)}
                                         autoFocus
-                                        disabled="disabled"
+                                        disabled
                                     />
                                     {/*<p>{this.state.carLocNote}</p>*/}
                                     <br/>
@@ -714,7 +672,7 @@ export default class Joblist extends React.Component{
                             <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
-                                    data={job_data}
+                                    data={this.state.job_data}
                                     rowClick={this.tableRowClicked}
                                     className="jobClass"
                                 />
@@ -763,7 +721,9 @@ export default class Joblist extends React.Component{
 
     render(){
         console.log("current status")
-        console.log(this.props);
+        console.log(this.state.job_data);
+        console.log(this.state.hub_data);
+        // console.log(this.props);
         console.log(this.state.status);
         console.log(this.state.tempBreakLength);
         console.log("inBreak? "+this.state.inBreak);
