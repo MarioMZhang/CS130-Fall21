@@ -24,6 +24,10 @@ export class HTTPHandler {
         return await this.getJobListFromUsername(username);
     }
 
+    async asyncPostJob(data) {
+        return await this.postJob(data);
+    }
+
     getHubs() {
         return new Promise(resolve => {
             fetch("http://localhost:3000/api/hubs/", {method: "GET", headers: this.headers})
@@ -63,6 +67,21 @@ export class HTTPHandler {
             fetch(url, {method: "GET", headers: this.headers})
                 .then(response => response.json())
                 .then(data => resolve(data))
+                .catch(err => console.log(err.toString()));
+        });
+    }
+
+    postJob(data) {
+        const url = "http://localhost:3000/api/jobs";
+        console.log(data);
+
+        return new Promise(resolve => {
+            fetch(url, {method: "POST", headers: this.headers, body: JSON.stringify(data)})
+                .then(response => {
+                    console.log(response);
+                    return response.status;
+                })
+                .then(status => resolve(status))
                 .catch(err => console.log(err.toString()));
         });
     }

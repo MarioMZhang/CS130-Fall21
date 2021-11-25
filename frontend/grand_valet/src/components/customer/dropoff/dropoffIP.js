@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
+import {HTTPHandler} from "../../util/http";
 
 
 // import TimePicker from 'react-time-picker';
@@ -111,6 +112,19 @@ export default class DropoffIP extends React.Component{
         };
     }
 
+    handleCodeSubmit = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+        console.log({
+            code: data.get('code')
+        });
+
+        var handler = new HTTPHandler();
+        handler.getCustomerJobFromUsername("username1")
+            .then(job => {
+                console.log(job);
+            });
+    };
 
 
     setUserLocation = (pos) => {
@@ -123,22 +137,6 @@ export default class DropoffIP extends React.Component{
 
         console.log(crd.latitude);
         console.log(crd.longitude);
-    };
-
-
-    tableRowClicked = (e, row) => {
-        console.log(row._row.data);
-        var data = row._row.data;
-
-        this.setState({
-            chosen_hub: {
-                id: data.id,
-                description: data.Description,
-                distance: data.Distance,
-            },
-            chosen_lat: data.latitude,
-            chosen_lng: data.longitude,
-        });
     };
 
 
@@ -213,10 +211,10 @@ export default class DropoffIP extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Drop off in progress
                             </Typography>
-                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" onSubmit={this.handleCodeSubmit} component="form" noValidate sx={{ mt: 1 }} >
                                 Verification code:
                                 <div style={{display:"flex", flexDirection:"row"}}>
-                                    
+
                                     <TextField
                                         margin="normal"
                                         required
@@ -225,8 +223,6 @@ export default class DropoffIP extends React.Component{
                                         id="code"
                                         autoFocus
                                         style={{padding:5}}
-                                        disabled
-                                        defaultValue={this.state.code}
                                     />
                                 </div>
                                 <Button

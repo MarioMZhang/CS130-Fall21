@@ -109,6 +109,7 @@ export default class DropoffSchedule extends React.Component{
             user_lat: 0,
             user_lng: 0,
             table_ref: createRef(),
+            show_warning: false,
             marker_crd: null,
             chosen_hub: null,
             chosen_lat: null,
@@ -126,6 +127,39 @@ export default class DropoffSchedule extends React.Component{
             hour: data.get('hour'),
             minute: data.get('minute')
         });
+
+        var scheduled_time = new Date();
+        scheduled_time.setHours(parseInt(data.get('hour').toString()));
+        scheduled_time.setMinutes(parseInt(data.get('minute').toString()));
+
+        var json_data = {
+            "type": 1,
+            "jobId": 0,
+            "scheduledTime": Math.floor(scheduled_time.getTime() / 1000),
+            "status": 1,
+            "licenceState": data.get('issuedState'),
+            "licenceNum": data.get('license'),
+            "hubId": this.state.chosen_hub.id,
+            "customerUsername": "customer1",
+            "code": null,
+            "carLocation": null,
+            "note": null,
+            "driverUsername": null,
+            "advanceState": [0, 0]
+        };
+
+        console.log(json_data);
+
+        let handler = new HTTPHandler();
+        handler.asyncPostJob(json_data)
+            .then(status => {
+               if (status !== 201) {
+                   window.alert("Failed to create new job with a error code of " + status.toString());
+               } else {
+                   window.location.href = "/customer?stage=ip";
+               }
+            });
+
     };
 
     setUserLocation = (pos) => {
@@ -307,7 +341,7 @@ export default class DropoffSchedule extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Schedule Drop Off
                             </Typography>
-                            <Box data-testid="schedule-form" component="form" onSubmit={this.handleSubmit}noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" component="form" onSubmit={this.handleSubmit} noValidate sx={{ mt: 1 }} >
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     <TextField
                                         margin="normal"
