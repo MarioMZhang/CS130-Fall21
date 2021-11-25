@@ -152,12 +152,14 @@ export default class DropoffSchedule extends React.Component{
 
         let handler = new HTTPHandler();
         handler.asyncPostJob(json_data)
-            .then(status => {
-               if (status !== 201) {
-                   window.alert("Failed to create new job with a error code of " + status.toString());
-               } else {
-                   window.location.href = "/customer?stage=ip";
-               }
+            .then(response => {
+                console.log(response);
+
+                if (response.hasOwnProperty("jobId")) {
+                    window.location.href = "/customer?stage=ip&id=" + response.jobId;
+                } else {
+                    window.alert("Failed to create new job.");
+                }
             });
 
     };

@@ -115,15 +115,36 @@ export default class DropoffIP extends React.Component{
     handleCodeSubmit = (event) => {
         event.preventDefault();
         const data = new FormData(event.currentTarget);
-        console.log({
-            code: data.get('code')
-        });
+
+        var jobId = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        var code = parseInt(data.get('code'));
 
         var handler = new HTTPHandler();
-        handler.getCustomerJobFromUsername("username1")
-            .then(job => {
-                console.log(job);
-            });
+        handler.asyncGetJobsFromID(jobId)
+            .then(response => {
+                response.advanceState = [1, 0];
+                return response;
+            })
+            .then(updated => {
+                if(code === parseInt(updated.code)) {
+                    handler.asyncPostJob(updated)
+                        .then(response => {
+                            if (response.hasOwnProperty("jobId")) {
+                                console.log("success");
+                                // advance only when both customer and driver confirm
+                                if (response.advanceState === [1, 1]) {
+                                    window.location.href = "/customer?stage=ip&id=" + response.jobId.toString();
+                                }
+                            } else {
+                                window.alert("Failed to create new job.");
+                            }
+                        })
+                        .catch(err => console.log(err.toString()));
+                } else {
+                    window.alert("The verification codes doesn't match. Please double check with ur driver.");
+                }
+            })
+            .catch(err => console.log(err.toString()));
     };
 
 

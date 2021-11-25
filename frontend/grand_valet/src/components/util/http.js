@@ -38,7 +38,7 @@ export class HTTPHandler {
     }
 
     getJobsFromID(id) {
-        const url = "http://localhost:3000/api/jobs?jobsid=" + id.toString();
+        const url = "http://localhost:3000/api/jobs?jobid=" + id.toString();
 
         return new Promise(resolve => {
             fetch(url, {method: "GET", headers: this.headers})
@@ -78,10 +78,9 @@ export class HTTPHandler {
         return new Promise(resolve => {
             fetch(url, {method: "POST", headers: this.headers, body: JSON.stringify(data)})
                 .then(response => {
-                    console.log(response);
-                    return response.status;
+                    // console.log(response.json());
+                    resolve(response.json());
                 })
-                .then(status => resolve(status))
                 .catch(err => console.log(err.toString()));
         });
     }
