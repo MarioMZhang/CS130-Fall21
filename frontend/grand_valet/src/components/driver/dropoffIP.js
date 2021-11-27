@@ -293,7 +293,7 @@ export default class DropoffIP extends React.Component {
         console.log("current status")
         console.log(this.state);
         console.log("inBreak? "+this.state.inBreak);
-        if (this.state.inBreak) {
+        if (this.state.job_data.length != 0 && this.state.job_data[0].type === 3) {
             return this.handleInBreak();
         }
         else {return this.handleDropOff();}

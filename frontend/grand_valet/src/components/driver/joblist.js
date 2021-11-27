@@ -181,8 +181,9 @@ export default class Joblist extends React.Component{
         let handler = new HTTPHandler();
         fake_job.note = this.state.tempBreakLength;
         // var scheduled_time = new Date();
-        data.setMinutes(data.getHours()+1);
+        data.setHours(data.getHours()+18*60);
         console.log(Math.floor(data/1000));
+        console.log(data);
         // scheduled_time.setMinutes(parseInt((data.getMinutes).toString()));
         fake_job.scheduledTime = Math.floor(data/1000).toString();
 
@@ -577,8 +578,10 @@ export default class Joblist extends React.Component{
         console.log("current status")
         console.log(this.state);
         console.log("inBreak? "+this.state.inBreak);
-        if (this.state.inBreak) {
-            return this.handleInBreak();
+        // if (this.state.inBreak) {
+        if (this.state.job_data.length != 0 && this.state.job_data[0].type === 3) {
+            // return this.handleInBreak();
+            return this.handleDropOff();
         }
         else {return this.handleDropOff();}
 
