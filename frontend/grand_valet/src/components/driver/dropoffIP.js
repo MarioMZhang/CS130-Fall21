@@ -74,7 +74,7 @@ export default class DropoffIP extends React.Component {
                     };
                     res.push(temp);
                 }
-
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 this.setState({job_data: res});
 
             });

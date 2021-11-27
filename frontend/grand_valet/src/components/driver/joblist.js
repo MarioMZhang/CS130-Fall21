@@ -18,22 +18,22 @@ import {HTTPHandler} from './../util/http';
 
 
 
-var fake_job = [
-    {
-        "type": 1,
-        "jobId": 1,
-        "scheduledTime": 1635313499,
-        "status": 0,
-        "licenceState": "CO",
-        "licenceNum": "CABD12",
+
+var fake_job = {
+        "type": 3,
+        "jobId": 0,
+        "scheduledTime": null,
+        "status": 11,
+        "licenceState": "break",
+        "licenceNum": "break",
         "hubId": 1,
         "code": 132561,
         "carLocation": null,
         "note": null,
-        "driverUsername": null,
-        "customerUsername": "smarsh",
+        "driverUsername": "driver1",
+        "customerUsername": null,
         "advanceState": [0, 0]
-    }]
+    }
 
 const theme = createTheme();
 
@@ -136,6 +136,7 @@ export default class Joblist extends React.Component{
                     res.push(temp);
                 }
                 console.log(jobs);
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 this.setState({job_data: res});
 
             });
@@ -174,8 +175,25 @@ export default class Joblist extends React.Component{
         console.log("tempBreakLength: "+e.target.value);
     }
 
-    handleBreak = () => {
+    handleBreak = (e) => {
         console.log("schedule a break");
+        var data = new Date();
+        let handler = new HTTPHandler();
+        fake_job.note = this.state.tempBreakLength;
+        // var scheduled_time = new Date();
+        data.setMinutes(data.getHours()+1);
+        console.log(Math.floor(data/1000));
+        // scheduled_time.setMinutes(parseInt((data.getMinutes).toString()));
+        fake_job.scheduledTime = Math.floor(data/1000).toString();
+
+        handler.asyncPostJob(fake_job)
+            .then(response => {
+                console.log("post job: \n"+response);
+                console.log("advanceState "+ response.advanceState);
+                window.location.href = "/driver?stage=driving&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+this.state.status+"&loc="+this.state.note+"&type="+this.state.type;
+
+            });
+        this.updateJoblist();
         this.setState({
             scheduleBreak: true,
             seconds: this.state.tempBreakLength * 60,

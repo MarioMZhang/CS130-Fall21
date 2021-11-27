@@ -72,7 +72,7 @@ export default class Complete extends React.Component {
                     };
                     res.push(temp);
                 }
-                // console.log(res);
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 this.setState({job_data: res});
 
             });

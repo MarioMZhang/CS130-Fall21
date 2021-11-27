@@ -16,6 +16,8 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import {HTTPHandler} from './../util/http';
+import Map from './../util/map';
+
 const theme = createTheme();
 const table_columns = [
     { title: "jobId", field:  "id"},
@@ -23,8 +25,18 @@ const table_columns = [
     { title: "licenceState", field: "licenceState"},
     { title: "licenceNum", field: "licenceNum" },
     { title: "scheduledTime", field: "scheduledTime"}
-
 ];
+
+var options = {
+    enableHighAccuracy: true,
+    timeout: 5000,
+    maximumAge: 0,
+};
+
+function errors(err) {
+    console.warn(`ERROR(${err.code}): ${err.message}`);
+}
+
 export default class Driving extends React.Component {
 
     updateHubs = () => {
@@ -72,7 +84,7 @@ export default class Driving extends React.Component {
                     };
                     res.push(temp);
                 }
-                // console.log(res);
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 this.setState({job_data: res});
 
             });
@@ -84,19 +96,19 @@ export default class Driving extends React.Component {
         handler.asyncGetJobsFromID(parseInt((new URL(window.location.href)).searchParams.get("id")))
             .then(job => {
                 // console.log()
-                var temp = {
-                    type: job.type,
-                    id: job.jobId,
-                    code: job.code,
-                    scheduledTime: new Date(job.scheduledTime * 1000).toTimeString().substring(0,8),
-                    licenceState: job.licenceState,
-                    licenceNum: job.licenceNum,
-                    hubId: job.hubId,
-                    code: job.code,
-                    status: job.status
-                };
+                // var temp = {
+                //     type: job.type,
+                //     id: job.jobId,
+                //     code: job.code,
+                //     scheduledTime: new Date(job.scheduledTime * 1000).toTimeString().substring(0,8),
+                //     licenceState: job.licenceState,
+                //     licenceNum: job.licenceNum,
+                //     hubId: job.hubId,
+                //     code: job.code,
+                //     status: job.status
+                // };
                 this.setState({
-                    cur_job: job, status: job.status, carLocNote: job.note
+                    cur_job: job, status: job.status, carLocNote: job.note, job_loc: job.carLocation
                 });
             });
     };
@@ -107,6 +119,17 @@ export default class Driving extends React.Component {
         });
 
     }
+
+
+
+    success = (pos) => {
+        var crd = pos.coords;
+        console.log("current latitude: "+crd.latitude);
+        console.log("current logtidude: "+crd.longitude);
+        this.setState({
+            cur_location: [crd.latitude, crd.longitude]
+        });
+    };
 
     handleParkConfirm = () => {
         console.log("save notes for car location"+this.state.carLocNote);
@@ -121,7 +144,8 @@ export default class Driving extends React.Component {
                     // job.status = job.status + 1;
                     job.status = job.status + 1;
                     job.note = this.state.carLocNote;
-                    job.carLocation = [-118,72]; // grab a map
+
+                    job.carLocation = this.state.cur_location; // grab a map
                     return job;
                 }
             })
@@ -140,6 +164,8 @@ export default class Driving extends React.Component {
         this.updateJoblist();
         this.updateHubs();
         this.updateJob();
+
+        navigator.geolocation.getCurrentPosition(this.success, errors, options);
 
         if (this.state.inBreak || (this.state.scheduleBreak && this.state.job_data.length === 0)) {
             if (!this.state.inBreak) {
@@ -189,8 +215,11 @@ export default class Driving extends React.Component {
             time: {},
             seconds: 0,
             job_data: [],
-            hub_data: []
+            hub_data: [],
+            cur_location: [0,0],
+            job_loc: [0,0]
         };
+        // this.success = this.success.bind(this);
         this.updateJob();
     }
     handleDropOff = () => {
@@ -209,7 +238,7 @@ export default class Driving extends React.Component {
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"50%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={this.state.job_data}
@@ -217,6 +246,14 @@ export default class Driving extends React.Component {
                                 className="jobClass"
                             />
                         </div>
+                        {this.state.status === 8 &&
+                        <div style={{display: 'flex',  justifyContent:'center'}}>
+                            <Map data-testid="schedule-map" center_lat={this.state.cur_location[0]} center_lng={this.state.cur_location[1]} marker_crd={this.state.job_loc} chosen_lat={this.state.job_loc[0]} chosen_lng={this.state.job_loc[1]} />
+                        </div>
+                        }
+
+
+
                         {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
                     </Grid>
                     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
