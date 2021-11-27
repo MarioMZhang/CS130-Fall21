@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid";
 import CssBaseline from "@mui/material/CssBaseline";
 import {reactFormatter, ReactTabulator} from "react-tabulator";
 import TextField from '@mui/material/TextField';
-// import Link from '@mui/material/Link';
+import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -25,7 +25,7 @@ const table_columns = [
     { title: "scheduledTime", field: "scheduledTime"}
 
 ];
-export default class DropoffIP extends React.Component {
+export default class Driving extends React.Component {
 
     updateHubs = () => {
         let handler = new HTTPHandler();
@@ -52,13 +52,11 @@ export default class DropoffIP extends React.Component {
     };
 
     updateJoblist = () => {
-        // var cur_id = parseInt((new URL(window.location.href)).searchParams.get("id"));
-
         let handler = new HTTPHandler();
         handler.asyncGetDriverJobs("driver1")
             .then(jobs => {
                 var res = [];
-                console.log("in updatejoblist job----- ");
+                console.log("updateJobList---");
                 console.log(jobs);
                 for (let i = 0; i < jobs.length; i ++) {
                     const cur = jobs[i];
@@ -74,7 +72,7 @@ export default class DropoffIP extends React.Component {
                     };
                     res.push(temp);
                 }
-
+                // console.log(res);
                 this.setState({job_data: res});
 
             });
@@ -97,21 +95,52 @@ export default class DropoffIP extends React.Component {
                     code: job.code,
                     status: job.status
                 };
-                this.setState({cur_job: job, status: job.status});
+                this.setState({
+                    cur_job: job, status: job.status, carLocNote: job.note
+                });
             });
+    };
+
+    handleTextField = (v) => {
+        this.setState({
+            carLocNote: v
+        });
+
     }
 
-    // componentDidUpdate(prevProps, prevState, snapshot) {
-    //     this.updateJoblist();
-    //     this.updateHubs();
-    // }
+    handleParkConfirm = () => {
+        console.log("save notes for car location"+this.state.carLocNote);
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(parseInt((new URL(window.location.href)).searchParams.get("id")))
+            .then(job => {
 
+                if (!job) {
+                    window.alert("job not found!");
+                } else {
+                    console.log("ddddd+" + this.state.carLocNote);
+                    // job.status = job.status + 1;
+                    job.status = job.status + 1;
+                    job.note = this.state.carLocNote;
+                    job.carLocation = [-118,72]; // grab a map
+                    return job;
+                }
+            })
+            .then(updated => {
+                handler.asyncPostJob(updated)
+                    .then(response => {
+                        console.log("post job: \n"+response);
+                    });
+                window.location.href = "/driver?stage=complete&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+updated.status+"&loc="+this.state.carLocNote+"&type="+this.state.type;
+            })
+            .catch(err => console.log(err.toString()));
+    };
 
     componentDidMount() {
         console.log("mounting!");
         this.updateJoblist();
         this.updateHubs();
         this.updateJob();
+
         if (this.state.inBreak || (this.state.scheduleBreak && this.state.job_data.length === 0)) {
             if (!this.state.inBreak) {
                 this.setState({
@@ -120,56 +149,6 @@ export default class DropoffIP extends React.Component {
             }
         }
     }
-
-    handleConfirm = () => {
-        console.log("handle confirm");
-        // this.setState({
-        //     status: this.state.status + 1
-        // });
-        var found = false;
-        let handler = new HTTPHandler();
-        handler.asyncGetJobsFromID(this.state.id)
-            .then(job => {
-
-                if (!job) {
-                    window.alert("job not found!");
-                }
-                else {
-                    if (job.status === 7) {
-                        job.status += 1;
-                    }
-                    else {
-                        job.advanceState[1] = 1;
-                    }
-                    // job.status += 1;
-                    return job;
-                }
-            })
-            .then (updated =>{
-                handler.asyncPostJob(updated)
-                    .then(response => {
-                        console.log("post job: \n"+response);
-                        console.log("advanceState "+ response.advanceState);
-                        window.location.href = "/driver?stage=driving&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+this.state.status+"&loc="+this.state.note+"&type="+this.state.type;
-                        // if (response.advanceState === [1, 1]) {
-                        //     window.location.href = "/driver?stage=driving&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+this.state.status+"&loc="+this.state.note+"&type="+this.state.type;
-                        // }
-                    });
-            });
-    }
-
-    handleBackClick = () => {
-        console.log("handle back click");
-        this.setState({
-            type: 0,
-            // id: -1,
-            status: -1,
-            // code: -1,
-            // hubId: -1
-        });
-        window.location.href = "/driver?joblist";
-    }
-
     tableRowClicked = (e, row) => {
         console.log("table row clicked");
         console.log("row id:"+row._row.data.id);
@@ -202,7 +181,7 @@ export default class DropoffIP extends React.Component {
             code: parseInt((new URL(window.location.href)).searchParams.get("code")),
             hubId: parseInt((new URL(window.location.href)).searchParams.get("hubId")),
             hub: (new URL(window.location.href)).searchParams.get("dpt").toString(),
-            carLocNote: ((new URL(window.location.href)).searchParams.get("note")?(new URL(window.location.href)).searchParams.get("note").toString():null),
+            carLocNote: ((new URL(window.location.href)).searchParams.get("note")?(new URL(window.location.href)).searchParams.get("loc").toString():null),
             scheduleBreak: false,
             breakLength: 0,
             tempBreakLength: 10,
@@ -215,8 +194,7 @@ export default class DropoffIP extends React.Component {
         this.updateJob();
     }
     handleDropOff = () => {
-        console.log("start IP");
-        return(
+        return (
             <ThemeProvider theme={theme}>
                 <Grid container component="main" sx={{ height: '100vh' }}>
                     <CssBaseline />
@@ -252,33 +230,32 @@ export default class DropoffIP extends React.Component {
                             }}
                         >
                             <Typography component="h1" variant="h5">
-                                {this.state.status === 2 ? 'Pick Car up at ...' : 'Pick Key Up at ...'}
+                                {this.state.status === 3 ? 'Park the car ...' : 'Take the Car Out from...'}
                             </Typography>
+                            {this.state.status === 3 ? 'Additional Note for Location:' : 'Note for Location:'}
                             <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                Address:
+                                <TextField
+                                    margin="normal"
+                                    required
+                                    fullWidth
+                                    id="note"
+                                    label="note"
+                                    name="note"
+                                    value={this.state.carLocNote}
+                                    // autoComplete="note"
+                                    onChange={(event) => this.handleTextField(event.target.value)}
+                                    autoFocus
+                                    disabled={this.state.status === 8}
+                                />
                                 <br/>
-                                {this.state.hub}
-                                <br/>
-                                <br/>
-                                Verification Code:
-                                <br/>
-                                {this.state.code}
                                 <br/>
                                 <Button
-                                    onClick={this.handleConfirm}
+                                    onClick={this.handleParkConfirm}
                                     fullWidth
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
                                 >
-                                    Confirm
-                                </Button>
-                                <Button
-                                    onClick={this.handleBackClick}
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{ mt: 3, mb: 2 }}
-                                >
-                                    Back
+                                    confirm
                                 </Button>
                             </Box>
                         </Box>
@@ -292,6 +269,7 @@ export default class DropoffIP extends React.Component {
     render(){
         console.log("current status")
         console.log(this.state);
+
         console.log("inBreak? "+this.state.inBreak);
         if (this.state.inBreak) {
             return this.handleInBreak();
