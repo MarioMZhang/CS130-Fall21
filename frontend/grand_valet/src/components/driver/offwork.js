@@ -157,19 +157,27 @@ export default class Offwork extends React.Component  {
         else {
             return(
                 <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
+                    <Grid container component="main" sx={{ height: '15vh' }}>
+                        <Typography component="h1" variant="h5">
+                            Your break session ends at:
 
-                        Your break session ends at:
+
                         <br/>
                         {(this.end_time)}
+                        </Typography>
                         {this.startTimer()}
-                        <button
+
+
+                    </Grid>
+                    <Box component="form" noValidate sx={{ mt: 1 }}>
+                        <Button
+                            variant="contained"
                             onClick={this.handleClick}
                         >
                             Back to Work
-                        </button>
+                        </Button>
+                    </Box>
 
-                    </Grid>
                 </ThemeProvider>
             );
         }
