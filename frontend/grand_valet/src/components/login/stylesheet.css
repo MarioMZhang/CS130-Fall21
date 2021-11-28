@@ -23,8 +23,8 @@ side of the page */
         background-image: url('./images/car1.jpg');
         background-size: 500px;
         background-repeat: no-repeat;
-        background-position: center bottom;
-        padding-bottom: 100px;
+        background-position: bottom;
+        padding-bottom: 150px;
         opacity: 0.8;
         animation-name:  car-ani;
         animation-duration: 0.25s;
