@@ -210,8 +210,13 @@ export default class Joblist extends React.Component{
                 }
 
                 res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
-
-                fake_job.scheduledTime = (res[res.length - 1].scheduledTime > Math.floor(data/1000)) ? (res[res.length - 1].scheduledTime + 1200).toString() : (Math.floor(data/1000)+600).toString()// the time a break is ok
+                if(res.length != 0){
+                    fake_job.scheduledTime = (res[res.length - 1].scheduledTime > Math.floor(data/1000)) ? (res[res.length - 1].scheduledTime + 1200).toString() : (Math.floor(data/1000)+600).toString()// the time a break is ok
+                }
+                else
+                {
+                    fake_job.scheduledTime =  (Math.floor(data/1000)+600).toString();
+                }
                 return fake_job;
             })
             .then(fake_job=>{
