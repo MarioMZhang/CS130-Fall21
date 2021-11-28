@@ -44,16 +44,40 @@ const theme = createTheme();
 
 export default class Offwork extends React.Component  {
 
+    handleClick = () => {
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(parseInt((new URL(window.location.href)).searchParams.get("id")))
+            .then(job => {
+                if (!job) {
+                    window.alert("job not found!");
+                }
+                else {
+                    job.status = 13;
+                    job.driverUsername = null;
+                    return job;
+                }
+            })
+            .then (updated =>{
+                handler.asyncPostJob(updated)
+                    .then(response => {
+                        console.log("post job:");
+                        console.log(response);
+                        window.location.href = "/driver?stage=joblist";
+                        return response;
+                    });
+            });
+    };
 
     constructor() {
 
         super();
-
+        var date = new Date();
         this.state = { time: {}, seconds: 1200};
         this.timer = 0;
         this.startTimer = this.startTimer.bind(this);
         this.countDown = this.countDown.bind(this);
-        this.end_time = parseInt((new URL(window.location.href)).searchParams.get("len"));
+        this.target_time = parseInt((new URL(window.location.href)).searchParams.get("len"));
+        this.end_time = new Date(parseInt((new URL(window.location.href)).searchParams.get("len"))*1000).toString();
 
     }
 
@@ -104,17 +128,49 @@ export default class Offwork extends React.Component  {
     }
 
     render() {
-        if (this.state.seconds === 0) {
 
+        const new_time = Math.floor(new Date()/1000);
+
+        if (new_time >= this.target_time) {
+            let handler = new HTTPHandler();
+            handler.asyncGetJobsFromID(parseInt((new URL(window.location.href)).searchParams.get("id")))
+                .then(job => {
+                    if (!job) {
+                        window.alert("job not found!");
+                    }
+                    else {
+                        job.status = 13;
+                        job.driverUsername = null;
+                        return job;
+                    }
+                })
+                .then (updated =>{
+                    handler.asyncPostJob(updated)
+                        .then(response => {
+                            console.log("post job:");
+                            console.log(response);
+                            window.location.href = "/driver?stage=joblist";
+                            return response;
+                        });
+                });
         }
         else {
             return(
-                <div>
-                    Your break session ends at:
-                    {Math.floor(this.end_time/1000).toString()}
-                    {this.startTimer()}
-                    {/*m: {this.state.time.m} s: {this.state.time.s}*/}
-                </div>
+                <ThemeProvider theme={theme}>
+                    <Grid container component="main" sx={{ height: '100vh' }}>
+
+                        Your break session ends at:
+                        <br/>
+                        {(this.end_time)}
+                        {this.startTimer()}
+                        <button
+                            onClick={this.handleClick}
+                        >
+                            Back to Work
+                        </button>
+
+                    </Grid>
+                </ThemeProvider>
             );
         }
 

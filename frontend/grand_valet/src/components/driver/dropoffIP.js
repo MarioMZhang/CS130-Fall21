@@ -87,17 +87,17 @@ export default class DropoffIP extends React.Component {
         handler.asyncGetJobsFromID(parseInt((new URL(window.location.href)).searchParams.get("id")))
             .then(job => {
                 // console.log()
-                var temp = {
-                    type: job.type,
-                    id: job.jobId,
-                    code: job.code,
-                    scheduledTime: new Date(job.scheduledTime * 1000).toTimeString().substring(0,8),
-                    licenceState: job.licenceState,
-                    licenceNum: job.licenceNum,
-                    hubId: job.hubId,
-                    code: job.code,
-                    status: job.status
-                };
+                // var temp = {
+                //     type: job.type,
+                //     id: job.jobId,
+                //     code: job.code,
+                //     scheduledTime: new Date(job.scheduledTime * 1000).toTimeString().substring(0,8),
+                //     licenceState: job.licenceState,
+                //     licenceNum: job.licenceNum,
+                //     hubId: job.hubId,
+                //     code: job.code,
+                //     status: job.status
+                // };
                 this.setState({cur_job: job, status: job.status});
             });
     }
@@ -304,13 +304,15 @@ export default class DropoffIP extends React.Component {
 
     render(){
         console.log("current status")
-        console.log(this.state);
-        console.log("inBreak? "+this.state.inBreak);
-        if (this.state.job_data.length != 0 && this.state.job_data[0].type === 3) {
-            return this.handleInBreak();
+
+        const [first] = this.state.job_data;
+        console.log(first);
+        if (this.state.job_data.length != 0 && first.type === 3 && first.status != 13) {
+            var time = new Date();
+            const len = Math.floor(time / 1000) + first.note * 60;
+            window.location.href = "/driver?stage=offwork&id=" + first.id.toString() + "&len=" + len.toString();
         }
         else {return this.handleDropOff();}
-
 
     }
 }

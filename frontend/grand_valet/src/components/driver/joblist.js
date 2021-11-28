@@ -211,7 +211,7 @@ export default class Joblist extends React.Component{
 
                 res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
 
-                fake_job.scheduledTime = (res[res.length - 1].scheduledTime > Math.floor(data/1000)) ? (res[res.length - 1].scheduledTime + 1200).toString() : Math.floor((data/1000+60)).toString()// the time a break is ok
+                fake_job.scheduledTime = (res[res.length - 1].scheduledTime > Math.floor(data/1000)) ? (res[res.length - 1].scheduledTime + 1200).toString() : (Math.floor(data/1000)+600).toString()// the time a break is ok
                 return fake_job;
             })
             .then(fake_job=>{
@@ -625,24 +625,16 @@ export default class Joblist extends React.Component{
 
     render(){
         console.log("current status")
-        // console.log(this.state);
+        console.log(this.state);
 
         const [first] = this.state.job_data;
         console.log(first);
-
-        // if (this.state.inBreak) {
-        if (this.state.job_data.length != 0 && first.type === 3) {
+        if (this.state.job_data.length != 0 && first.type === 3 && first.status != 13) {
             var time = new Date();
-            const len = Math.floor((time/1000)+first.note);
-            // console.log(len)
-            window.location.href = "/driver?stage=offwork&id="+first.id.toString()+"&len="+len.toString();
-
-            // return this.handleInBreak(this.state.job_data[0].jobId);
-            // return this.handleDropOff();
+            const len = Math.floor(time / 1000) + first.note * 60;
+            window.location.href = "/driver?stage=offwork&id=" + first.id.toString() + "&len=" + len.toString();
         }
         else {return this.handleDropOff();}
-
-
     }
 }
 

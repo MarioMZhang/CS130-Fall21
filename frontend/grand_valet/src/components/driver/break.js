@@ -99,40 +99,6 @@ export default class Break extends React.Component {
             });
     };
 
-    handleKeyConfirm = () => {
-        console.log("handle key confirm");
-        let handler = new HTTPHandler();
-        handler.asyncGetJobsFromID(this.state.id)
-            .then(job => {
-
-                if (!job) {
-                    window.alert("job not found!");
-                }
-                else {
-                    if (job.status === 4) {
-                        // job.note = "4";
-                        job.status = 5;
-                    }
-                    else {
-                        // job.note = "9";
-                        job.status = 9;
-                        job.advanceState[1] = 1;
-                    }
-                    job.driverUsername = null;
-                    // job.carLocation = this.state.carLocNote;
-                    return job;
-                }
-            })
-            .then(updated => {
-                handler.asyncPostJob(updated)
-                    .then(response => {
-                        console.log("post job: \n"+response);
-                    });
-                window.location.href = "/driver?stage=joblist";
-            })
-
-            .catch(err => console.log(err.toString()));
-    }
 
     componentDidMount() {
         console.log("mounting!");
@@ -149,6 +115,19 @@ export default class Break extends React.Component {
             }
         }
     }
+
+    handleBackClick = () => {
+        console.log("handle back click");
+        this.setState({
+            type: 0,
+            // id: -1,
+            status: -1,
+            // code: -1,
+            // hubId: -1
+        });
+        window.location.href = "/driver?joblist";
+    }
+
     tableRowClicked = (e, row) => {
         console.log("table row clicked");
         console.log("row id:" + row._row.data.id);
@@ -252,7 +231,14 @@ export default class Break extends React.Component {
                                     {this.state.cur_time}
                                 </Box>
                             </Typography>
-
+    ·                       <Button
+                            onClick={this.handleBackClick}
+                            fullWidth
+                            variant="contained"
+                            sx={{ mt: 0.4, mb: 2 }}
+                        >
+                            Back
+                        </Button>
 
                         </Box>
                     </Grid>
@@ -264,10 +250,53 @@ export default class Break extends React.Component {
 
     render(){
         console.log("current status")
-        console.log(this.state);
-        console.log("inBreak? "+this.state.inBreak);
-        if (this.state.job_data.length != 0 && this.state.job_data[0].type === 3) {
-            return this.handleInBreak();
+        // console.log(this.state);
+
+        const [first] = this.state.job_data;
+        console.log(first);
+
+        // if (this.state.inBreak) {
+        if (this.state.job_data.length != 0 && first.type === 3 && first.status != 13) {
+            // let handler = new HTTPHandler();
+            // handler.asyncGetDriverJobs("driver1")
+            //     .then(jobs => {
+            //         console.log("updateJobList----")
+            //         console.log(jobs);
+            //         var res = [];
+            //
+            //         for (let i = 0; i < jobs.length; i ++) {
+            //             const cur = jobs[i];
+            //             var temp = {
+            //                 type: cur.type,
+            //                 id: cur.jobId,
+            //                 scheduledTime: new Date(cur.scheduledTime * 1000).toTimeString().substring(0,8),
+            //                 licenceState: cur.licenceState,
+            //                 licenceNum: cur.licenceNum,
+            //                 hubId: cur.hubId,
+            //                 code: cur.code,
+            //                 status: cur.status,
+            //                 note: cur.note
+            //             };
+            //             res.push(temp);
+            //         }
+            //         console.log(jobs);
+            //         res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
+            //         return res;
+            //     })
+            //     .then(res => {
+            //         const [first] = res;
+            //         if (res.length != 0 && first.type === 3) {
+            //             var time = new Date();
+            //             const len = Math.floor(time / 1000) + first.note * 60;
+            //             window.location.href = "/driver?stage=offwork&id=" + first.id.toString() + "&len=" + len.toString();
+            //         }
+            //         else {
+            //             window.location.href = "/driver?stage=joblist";
+            //         }
+            //     });
+            var time = new Date();
+            const len = Math.floor(time / 1000) + first.note * 60;
+            window.location.href = "/driver?stage=offwork&id=" + first.id.toString() + "&len=" + len.toString();
         }
         else {return this.handleDropOff();}
 
