@@ -17,8 +17,8 @@ db.Users.insertMany([{ "type": 1, "name": "Customer 1", "username": "customer1",
 					{ "type": 2, "name": "Driver 1", "username": "driver1", "password": "$2a$10$2DGJ96C77f/WwIwClPwSNuQRqjoSnDFj9GDKjg6X/PePgFdXoE4W6", "email": "d1@spelementary.edu", "phone": "7190000002", "driverStatus": 1 },
 					{ "type": 2, "name": "Driver 2", "username": "driver2", "password": "$2a$10$2DGJ96C77f/WwIwClPwSNuQRqjoSnDFj9GDKjg6X/PePgFdXoE4W6", "email": "d2@spelementary.edu", "phone": "7190000003", "driverStatus": 1 }])
 
-db.Jobs.insertMany([{"type": 1, "jobId": 1, "scheduledTime": 1637096480, "status": 2, "licenceState": "CO", "licenceNum": "CABD12", "hubId": 1, "code": 132561, "carLocation": null, "note": null, "driverUsername": "driver1", "customerUsername": "customer1", "advanceState": [1, 0]},
-					{"type": 1, "jobId": 2, "scheduledTime": 1637099480, "status": 2, "licenceState": "CO", "licenceNum": "CABD12", "hubId": 2, "code": 132561, "carLocation": null, "note": null, "driverUsername": "driver1", "customerUsername": "customer2", "advanceState": [1, 0]},
-					{"type": 2, "jobId": 3, "scheduledTime": 1637099400, "status": 7, "licenceState": "CO", "licenceNum": "CABD34", "hubId": 2, "code": 132533, "carLocation": [34.0693226, -118.4434938], "note": "at the door", "driverUsername": "driver1", "customerUsername": "customer3", "advanceState": [1, 0]},])
+db.Jobs.insertMany([{"type": 1, "jobId": 1, "scheduledTime": 1638126500, "status": 2, "licenceState": "CO", "licenceNum": "CABD12", "hubId": 1, "code": 132561, "carLocation": null, "note": null, "driverUsername": "driver2", "customerUsername": "customer1", "advanceState": [1, 0]},
+					{"type": 1, "jobId": 2, "scheduledTime": 1638127000, "status": 2, "licenceState": "CO", "licenceNum": "CABD12", "hubId": 2, "code": 132561, "carLocation": null, "note": null, "driverUsername": "driver2", "customerUsername": "customer2", "advanceState": [1, 0]},
+					{"type": 2, "jobId": 3, "scheduledTime": 1638126300, "status": 7, "licenceState": "CO", "licenceNum": "CABD34", "hubId": 2, "code": 132533, "carLocation": [34.0693226, -118.4434938], "note": "at the door", "driverUsername": "driver2", "customerUsername": "customer3", "advanceState": [1, 0]},])
 
 db.Meta.insertMany([{"maxJobId": 3, "maxHubId": 3}])
