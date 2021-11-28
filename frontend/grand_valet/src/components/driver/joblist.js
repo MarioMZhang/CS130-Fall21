@@ -148,7 +148,7 @@ export default class Joblist extends React.Component{
 
     componentDidMount() {
         console.log("mounting!");
-        this.updateTimer = setInterval(() => this.loadNewData(), 30000);
+        this.updateTimer = setInterval(() => this.updateJoblist(), 10000);
         this.updateJoblist();
         this.updateHubs();
 
@@ -215,15 +215,6 @@ export default class Joblist extends React.Component{
 
                 res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 if(res.length != 0){
-                    // console.log(new Date(parseInt(res[res.length - 1].scheduledTime)));
-                    // console.log(parseInt(Math.floor(data/1000)));
-                    // if (data < new Date(res[res.length - 1].scheduledTime*1000)) {
-                    //     console.log("correct");
-                    //     fake_job.scheduledTime = (res[res.length - 1].scheduledTime + 1200).toString();
-                    // }
-                    // else {
-                    //     fake_job.scheduledTime  = (Math.floor(data/1000)+600).toString();
-                    // }
                     fake_job.scheduledTime = (parseInt(res[res.length - 1].scheduledTime)  > parseInt(Math.floor(data/1000))) ? (res[res.length - 1].scheduledTime + 1200).toString() : (Math.floor(data/1000)+600).toString()// the time a break is ok
                 }
                 else
