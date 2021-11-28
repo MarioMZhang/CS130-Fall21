@@ -16,6 +16,7 @@ import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import {HTTPHandler} from './../util/http';
+import './offwork.css';
 const theme = createTheme();
 
 //
@@ -177,6 +178,10 @@ export default class Offwork extends React.Component  {
                             Back to Work
                         </Button>
                     </Box>
+                    <div id="images">
+                        <img class="top" src="https://media.istockphoto.com/vectors/break-time-postcard-vector-id669319090?k=20&m=669319090&s=612x612&w=0&h=zNzGQP1EQLB-bSZ9Hyxdd51g2L38XCMtpEmpYidJCbk=" alt="break1" />
+                        <img class="bottom" src="https://media.istockphoto.com/vectors/time-to-relax-card-vector-id1014733244?k=20&m=1014733244&s=612x612&w=0&h=XJ7t5-NCfLo_iTvYpbP0C8x6jeii6NFgyd6chXqRU-U=" alt="break2"/>
+                        </div>
 
                 </ThemeProvider>
             );

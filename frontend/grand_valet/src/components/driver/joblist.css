@@ -1,7 +1,7 @@
 /* background image on the left */
 .MuiGrid-root.MuiGrid-item.MuiGrid-grid-sm-4.MuiGrid-grid-md-7.css-gj5jbs-MuiGrid-root{
   background-image: url('./images/parking2.jpg');
-  background-size: 200% 75%;
+  background-size: 200% 100%;
   background-position: top;
   margin-bottom: 0em;
 }

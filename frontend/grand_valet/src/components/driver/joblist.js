@@ -343,7 +343,7 @@ export default class Joblist extends React.Component{
         if (this.state.status === -1) {
             return (
                 <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
+                    <Grid container component="main" sx={{ height: '105vh' }}>
                         <CssBaseline />
                         <Grid
                             item
@@ -356,7 +356,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div data-testid="test-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+                            <div data-testid="test-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"100%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={this.state.job_data}
