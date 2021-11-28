@@ -38,7 +38,7 @@ export default function LogInImage() {
         // todo: authenticate and redirect based on
 
         const userPath = "/customer?stage=schedule";
-        const partnerPath = "/partner?stage=schedule";
+        const partnerPath = "/driver?stage=joblist";
 
         // for now, login as user
         window.location.href=userPath;
