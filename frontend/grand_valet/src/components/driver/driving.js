@@ -80,7 +80,8 @@ export default class Driving extends React.Component {
                         licenceNum: cur.licenceNum,
                         hubId: cur.hubId,
                         code: cur.code,
-                        status: cur.status
+                        status: cur.status,
+                        note: cur.note
                     };
                     res.push(temp);
                 }
@@ -177,24 +178,36 @@ export default class Driving extends React.Component {
     }
     tableRowClicked = (e, row) => {
         console.log("table row clicked");
-        console.log("row id:"+row._row.data.id);
+        console.log("row id:" + row._row.data.id);
+        // console.log(data.status);
         var data = row._row.data;
         var hub = data.hubId
         var dpt = null;
-        for (var i = 0; i < this.state.hub_data.length; i++) {
-            if (this.state.hub_data[i].id === hub) {
-                dpt = this.state.hub_data[i].Description
-            }
-        }
-        if (data.status === 2 || data.status === 7) {
-            window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
-        }
-        else if (data.status === 3 || data.status ===8) {
-            window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
-        }
-        else if (data.status === 4 || data.status ===9) {
-            window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
-        }
+        var job_info = null;
+
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(data.id)
+            .then(job => {
+                console.log(job);
+                job_info = job;
+            })
+            .then(final_job => {
+                for (var i = 0; i < this.state.hub_data.length; i++) {
+                    if (this.state.hub_data[i].id === hub) {
+                        dpt = this.state.hub_data[i].Description
+                    }
+                }
+                if (data.status === 2 || data.status === 7) {
+                    window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                } else if (data.status === 3 || data.status === 8) {
+                    window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                } else if (data.status === 4 || data.status === 9) {
+                    window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                } else { // break
+
+                    window.location.href = "/driver?stage=break&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                }
+            });
     };
     constructor(props) {
         super(props);

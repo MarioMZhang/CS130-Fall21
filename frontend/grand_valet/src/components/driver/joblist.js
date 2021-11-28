@@ -26,7 +26,7 @@ var fake_job = {
         "status": 11,
         "licenceState": "break",
         "licenceNum": "break",
-        "hubId": 1,
+        "hubId": "break",
         "code": 132561,
         "carLocation": null,
         "note": null,
@@ -131,14 +131,14 @@ export default class Joblist extends React.Component{
                         licenceNum: cur.licenceNum,
                         hubId: cur.hubId,
                         code: cur.code,
-                        status: cur.status
+                        status: cur.status,
+                        note: cur.note
                     };
                     res.push(temp);
                 }
                 console.log(jobs);
                 res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 this.setState({job_data: res});
-
             });
     };
 
@@ -159,13 +159,29 @@ export default class Joblist extends React.Component{
         }
     }
 
-    handleInBreak = () => {
-        this.startTimer();
-        return(
-            <div>
-              m: {this.state.time.m} s: {this.state.time.s}
-            </div>
-        );
+    handleInBreak = (id) => {
+        window.location.href = "/driver?stage=offWork&id="+id;
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(id)
+            .then(job => {
+                // window.alert(job.id);
+                if (!job) {
+                    window.alert("job not found!");
+                }
+                else {
+                    job.status = 12;
+                    return job;
+                }
+            })
+            .then (updated =>{
+                handler.asyncPostJob(updated)
+                    .then(response => {
+                        console.log("post job:");
+                        console.log(response);
+                        window.location.href = "/driver?stage=offWork&id="+response.jobId;
+                        return response;
+                    });
+            });
     }
 
     handleDropdown = (e) => {
@@ -181,25 +197,45 @@ export default class Joblist extends React.Component{
         let handler = new HTTPHandler();
         fake_job.note = this.state.tempBreakLength;
         // var scheduled_time = new Date();
-        data.setHours(data.getHours()+18*60);
-        console.log(Math.floor(data/1000));
-        console.log(data);
-        // scheduled_time.setMinutes(parseInt((data.getMinutes).toString()));
-        fake_job.scheduledTime = Math.floor(data/1000).toString();
 
-        handler.asyncPostJob(fake_job)
-            .then(response => {
-                console.log("post job: \n"+response);
-                console.log("advanceState "+ response.advanceState);
-                window.location.href = "/driver?stage=driving&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+this.state.status+"&loc="+this.state.note+"&type="+this.state.type;
+        handler.asyncGetDriverJobs("driver1")
+            .then(jobs => {
+                console.log("updateJobList----")
+                console.log(jobs);
+                var res = [];
 
+                for (let i = 0; i < jobs.length; i ++) {
+                    const cur = jobs[i];
+                    res.push(cur);
+                }
+
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
+
+                fake_job.scheduledTime = (res[res.length - 1].scheduledTime > Math.floor(data/1000)) ? (res[res.length - 1].scheduledTime + 1200).toString() : Math.floor((data/1000+60)).toString()// the time a break is ok
+                return fake_job;
+            })
+            .then(fake_job=>{
+                console.log(fake_job);
+                handler.asyncPostJob(fake_job)
+                    .then(response => {
+                        console.log("post job: \n"+response);
+                        console.log("advanceState "+ response.advanceState);
+                        window.location.href = "/driver?stage=joblist";
+                    });
             });
-        this.updateJoblist();
-        this.setState({
-            scheduleBreak: true,
-            seconds: this.state.tempBreakLength * 60,
-            breakLength: this.state.tempBreakLength
-        });
+        // data.setHours(data.getHours()+18*60);
+        // console.log(Math.floor(data/1000));
+        // console.log(data);
+        // scheduled_time.setMinutes(parseInt((data.getMinutes).toString()));
+        // fake_job.scheduledTime = Math.floor((data/1000)+1000).toString();
+
+
+        // this.updateJoblist();
+        // this.setState({
+        //     scheduleBreak: true,
+        //     seconds: this.state.tempBreakLength * 60,
+        //     breakLength: this.state.tempBreakLength
+        // });
     }
 
     handleTextField = (v) => {
@@ -260,25 +296,38 @@ export default class Joblist extends React.Component{
     tableRowClicked = (e, row) => {
         console.log("table row clicked");
         console.log("row id:"+row._row.data.id);
+        // console.log(data.status);
         var data = row._row.data;
         var hub = data.hubId
         var dpt = null;
-        // console.log("table click: "+this.state.hub_data.length);
-        for (var i = 0; i < this.state.hub_data.length; i++) {
-            if (this.state.hub_data[i].id === hub) {
-                dpt = this.state.hub_data[i].Description
-            }
-        }
-        if (data.status === 2 || data.status === 7) {
-            window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
-        }
-        else if (data.status === 3 || data.status ===8) {
-            window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
-        }
-        else if (data.status === 4 || data.status ===9) {
-            window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
-        }
+        var job_info = null;
 
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(data.id)
+            .then(job => {
+                console.log(job);
+                job_info = job;
+            })
+            .then(final_job=> {
+                for (var i = 0; i < this.state.hub_data.length; i++) {
+                    if (this.state.hub_data[i].id === hub) {
+                        dpt = this.state.hub_data[i].Description
+                    }
+                }
+                if (data.status === 2 || data.status === 7) {
+                    window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                }
+                else if (data.status === 3 || data.status ===8) {
+                    window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                }
+                else if (data.status === 4 || data.status ===9) {
+                    window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                }
+                else { // break
+
+                    window.location.href = "/driver?stage=break&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                }
+            });
     };
 
     handleDropOff = () => {
@@ -576,12 +625,20 @@ export default class Joblist extends React.Component{
 
     render(){
         console.log("current status")
-        console.log(this.state);
-        console.log("inBreak? "+this.state.inBreak);
+        // console.log(this.state);
+
+        const [first] = this.state.job_data;
+        console.log(first);
+
         // if (this.state.inBreak) {
-        if (this.state.job_data.length != 0 && this.state.job_data[0].type === 3) {
-            // return this.handleInBreak();
-            return this.handleDropOff();
+        if (this.state.job_data.length != 0 && first.type === 3) {
+            var time = new Date();
+            const len = Math.floor((time/1000)+first.note);
+            // console.log(len)
+            window.location.href = "/driver?stage=offwork&id="+first.id.toString()+"&len="+len.toString();
+
+            // return this.handleInBreak(this.state.job_data[0].jobId);
+            // return this.handleDropOff();
         }
         else {return this.handleDropOff();}
 
