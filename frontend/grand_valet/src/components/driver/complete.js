@@ -6,7 +6,7 @@ import Grid from "@mui/material/Grid";
 import CssBaseline from "@mui/material/CssBaseline";
 import {reactFormatter, ReactTabulator} from "react-tabulator";
 import TextField from '@mui/material/TextField';
-// import Link from '@mui/material/Link';
+import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Button from '@mui/material/Button';
@@ -15,7 +15,6 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
-import './dropoffIP.css';
 import {HTTPHandler} from './../util/http';
 const theme = createTheme();
 const table_columns = [
@@ -26,7 +25,7 @@ const table_columns = [
     { title: "scheduledTime", field: "scheduledTime"}
 
 ];
-export default class DropoffIP extends React.Component {
+export default class Complete extends React.Component {
 
     updateHubs = () => {
         let handler = new HTTPHandler();
@@ -53,13 +52,11 @@ export default class DropoffIP extends React.Component {
     };
 
     updateJoblist = () => {
-        // var cur_id = parseInt((new URL(window.location.href)).searchParams.get("id"));
-
         let handler = new HTTPHandler();
         handler.asyncGetDriverJobs("driver1")
             .then(jobs => {
                 var res = [];
-                console.log("in updatejoblist job----- ");
+                console.log("updateJobList---");
                 console.log(jobs);
                 for (let i = 0; i < jobs.length; i ++) {
                     const cur = jobs[i];
@@ -81,54 +78,29 @@ export default class DropoffIP extends React.Component {
 
             });
     };
-
     updateJob = () => {
         var cur = null;
         let handler = new HTTPHandler();
         handler.asyncGetJobsFromID(parseInt((new URL(window.location.href)).searchParams.get("id")))
             .then(job => {
-                // console.log()
-                // var temp = {
-                //     type: job.type,
-                //     id: job.jobId,
-                //     code: job.code,
-                //     scheduledTime: new Date(job.scheduledTime * 1000).toTimeString().substring(0,8),
-                //     licenceState: job.licenceState,
-                //     licenceNum: job.licenceNum,
-                //     hubId: job.hubId,
-                //     code: job.code,
-                //     status: job.status
-                // };
+
+                var temp = {
+                    type: job.type,
+                    id: job.jobId,
+                    code: job.code,
+                    scheduledTime: new Date(job.scheduledTime * 1000).toTimeString().substring(0,8),
+                    licenceState: job.licenceState,
+                    licenceNum: job.licenceNum,
+                    hubId: job.hubId,
+                    code: job.code,
+                    status: job.status
+                };
                 this.setState({cur_job: job, status: job.status});
             });
-    }
+    };
 
-    // componentDidUpdate(prevProps, prevState, snapshot) {
-    //     this.updateJoblist();
-    //     this.updateHubs();
-    // }
-
-
-    componentDidMount() {
-        console.log("mounting!");
-        this.updateJoblist();
-        this.updateHubs();
-        this.updateJob();
-        if (this.state.inBreak || (this.state.scheduleBreak && this.state.job_data.length === 0)) {
-            if (!this.state.inBreak) {
-                this.setState({
-                    inBreak: true
-                });
-            }
-        }
-    }
-
-    handleConfirm = () => {
-        console.log("handle confirm");
-        // this.setState({
-        //     status: this.state.status + 1
-        // });
-        var found = false;
+    handleKeyConfirm = () => {
+        console.log("handle key confirm");
         let handler = new HTTPHandler();
         handler.asyncGetJobsFromID(this.state.id)
             .then(job => {
@@ -137,41 +109,46 @@ export default class DropoffIP extends React.Component {
                     window.alert("job not found!");
                 }
                 else {
-                    if (job.status === 7) {
-                        job.status += 1;
+                    if (job.status === 4) {
+                        // job.note = "4";
+                        job.status = 5;
                     }
                     else {
+                        // job.note = "9";
+                        job.status = 9;
                         job.advanceState[1] = 1;
                     }
-                    // job.status += 1;
+                    job.driverUsername = null;
+                    // job.carLocation = this.state.carLocNote;
                     return job;
                 }
             })
-            .then (updated =>{
+            .then(updated => {
                 handler.asyncPostJob(updated)
                     .then(response => {
                         console.log("post job: \n"+response);
-                        console.log("advanceState "+ response.advanceState);
-                        window.location.href = "/driver?stage=driving&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+this.state.status+"&loc="+this.state.note+"&type="+this.state.type;
-                        // if (response.advanceState === [1, 1]) {
-                        //     window.location.href = "/driver?stage=driving&id="+this.state.id+"&code="+this.state.code+"&hubId"+this.state.hubId+"&dpt="+this.state.hub+"&status="+this.state.status+"&loc="+this.state.note+"&type="+this.state.type;
-                        // }
                     });
-            });
+                window.location.href = "/driver?stage=joblist";
+            })
+
+            .catch(err => console.log(err.toString()));
     }
 
-    handleBackClick = () => {
-        console.log("handle back click");
-        this.setState({
-            type: 0,
-            // id: -1,
-            status: -1,
-            // code: -1,
-            // hubId: -1
-        });
-        window.location.href = "/driver?joblist";
+    componentDidMount() {
+        console.log("mounting!");
+        this.updateJoblist();
+        this.updateHubs();
+        this.updateJob();
+        // let timeLeftVar = this.secondsToTime(this.state.seconds);
+        // this.setState({ time: timeLeftVar });
+        if (this.state.inBreak || (this.state.scheduleBreak && this.state.job_data.length === 0)) {
+            if (!this.state.inBreak) {
+                this.setState({
+                    inBreak: true
+                });
+            }
+        }
     }
-
     tableRowClicked = (e, row) => {
         console.log("table row clicked");
         console.log("row id:" + row._row.data.id);
@@ -229,7 +206,6 @@ export default class DropoffIP extends React.Component {
         this.updateJob();
     }
     handleDropOff = () => {
-        console.log("start IP");
         return(
             <ThemeProvider theme={theme}>
                 <Grid container component="main" sx={{ height: '100vh' }}>
@@ -266,7 +242,7 @@ export default class DropoffIP extends React.Component {
                             }}
                         >
                             <Typography component="h1" variant="h5">
-                                {this.state.status === 2 ? 'Pick Car up at ...' : 'Pick Key Up at ...'}
+                                {this.state.status === 4 ? 'Drop Key Off at ...' : 'Drop Car off at ...'}
                             </Typography>
                             <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
                                 Address:
@@ -279,20 +255,12 @@ export default class DropoffIP extends React.Component {
                                 {this.state.code}
                                 <br/>
                                 <Button
-                                    onClick={this.handleConfirm}
+                                    onClick={this.handleKeyConfirm}
                                     fullWidth
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
                                 >
                                     Confirm
-                                </Button>
-                                <Button
-                                    onClick={this.handleBackClick}
-                                    fullWidth
-                                    variant="contained"
-                                    sx={{ mt: 3, mb: 2 }}
-                                >
-                                    Back
                                 </Button>
                             </Box>
                         </Box>
@@ -305,6 +273,7 @@ export default class DropoffIP extends React.Component {
 
     render(){
         console.log("current status")
+        console.log(this.state);
 
         const [first] = this.state.job_data;
         console.log(first);
@@ -314,6 +283,5 @@ export default class DropoffIP extends React.Component {
             window.location.href = "/driver?stage=offwork&id=" + first.id.toString() + "&len=" + len.toString();
         }
         else {return this.handleDropOff();}
-
     }
 }

@@ -275,12 +275,12 @@ router.post('/jobs',function(req, res, next) {
                     new_entry.type = jobtype;
                     new_entry.status = 11;
                     new_entry.scheduledTime = jobScheduledTime;
-                    new_entry.licenceState = null; 
-                    new_entry.licenceNum = null; 
-                    new_entry.hubId = null; 
+                    new_entry.licenceState = req.body.licenceState;
+                    new_entry.licenceNum = req.body.licenceNum;
+                    new_entry.hubId = req.body.hubId;
                     new_entry.code = null;
                     new_entry.carLocation = null;
-                    new_entry.note = null;
+                    new_entry.note = req.body.note;
                     new_entry.driverUsername = req.body.driverUsername;
                     new_entry.customerUsername = null;
                     new_entry.advanceState = [0, 0];
@@ -477,8 +477,8 @@ router.post('/jobs',function(req, res, next) {
             new_entry.licenceNum = req.body.licenceNum; 
             new_entry.hubId = jobhubid; 
             new_entry.code = jobcode;
-            new_entry.carLocation = null;
-            new_entry.note = null;
+            new_entry.carLocation = joblocation;
+            new_entry.note = req.body.note;
             new_entry.driverUsername = null;
             new_entry.customerUsername = req.body.customerUsername;
             new_entry.advanceState = [0,0];
@@ -570,11 +570,11 @@ router.post('/jobs',function(req, res, next) {
             new_entry.driverUsername = req.body.driverUsername;
             new_entry.customerUsername = req.body.customerUsername;
             new_entry.advanceState = jobadvancestate;
-            if (!joblocation || !req.body.note) {
-                res.status(400);
-                res.send("Missing car location or note");
-                return;
-            }
+            // if (!joblocation || !req.body.note) {
+            //     res.status(400);
+            //     res.send("Missing car location or note");
+            //     return;
+            // }
             GrandValet.Database.store_job(new_entry).then(() => {
                 // get again and return
                 GrandValet.Database.read_job(new_entry.jobId).then((result)=>{
@@ -613,6 +613,7 @@ router.post('/jobs',function(req, res, next) {
                     new_entry.status = 13;
                     new_entry.advanceState[0] = 1;
                     new_entry.advanceState[1] = 1;
+                    new_entry.driverUsername = null;
                 }
                 else if (jobadvancestate[0] == 1 || new_entry.advanceState[0] == 1) {
                     new_entry.advanceState[0] = 1;

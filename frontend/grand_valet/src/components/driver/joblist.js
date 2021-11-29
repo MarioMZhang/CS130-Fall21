@@ -18,22 +18,22 @@ import {HTTPHandler} from './../util/http';
 
 
 
-var fake_job = [
-    {
-        "type": 1,
-        "jobId": 1,
-        "scheduledTime": 1635313499,
-        "status": 0,
-        "licenceState": "CO",
-        "licenceNum": "CABD12",
-        "hubId": 1,
+
+var fake_job = {
+        "type": 3,
+        "jobId": 0,
+        "scheduledTime": null,
+        "status": 11,
+        "licenceState": "break",
+        "licenceNum": "break",
+        "hubId": "break",
         "code": 132561,
         "carLocation": null,
         "note": null,
-        "driverUsername": null,
-        "customerUsername": "smarsh",
+        "driverUsername": "driver1",
+        "customerUsername": null,
         "advanceState": [0, 0]
-    }]
+    }
 
 const theme = createTheme();
 
@@ -42,21 +42,11 @@ var printIcon = function(cell, formatterParams, onRendered){ //plain text value
 };
 
 const table_columns = [
+    { title: "jobId", field:  "id"},
     { title: "hubId", field: "hubId"},
     { title: "licenceState", field: "licenceState"},
     { title: "licenceNum", field: "licenceNum" },
     { title: "scheduledTime", field: "scheduledTime"}
-    // { title: "Open Time", field:"Opentime" },
-    // { title: "Close Time", field:"Closetime" },
-    // {
-    //     title: "Confirm",
-    //     align: "center",
-    //     formatter: printIcon,
-    //     cellClick: function (e, cell) {
-    //         if (window.confirm('Are you sure you wish to confirm this task? \n(please make sure you have gotten paid)')) {
-    //             cell.getRow().delete();
-    //         }
-    //     }}
 
 ];
 
@@ -105,13 +95,12 @@ export default class Joblist extends React.Component{
         handler.asyncGetHubs()
             .then(hubs => {
                 var res = [];
-
+                console.log("update hubs: "+hubs.length);
                 for (let i = 0; i < hubs.length; i ++) {
                     const cur = hubs[i];
                     var temp = {
                         id: cur.hubId,
                         Description: cur.description,
-                        // Distance: getDistanceFromLatLonInKm(cur.location[1], cur.location[0], this.state.user_lat, this.state.user_lng),
                         Opentime: new Date(cur.startTime * 1000).toTimeString(),
                         Closetime: new Date(cur.endTime * 1000).toTimeString(),
                         latitude: cur.location[1],
@@ -128,6 +117,8 @@ export default class Joblist extends React.Component{
         let handler = new HTTPHandler();
         handler.asyncGetDriverJobs("driver1")
             .then(jobs => {
+                console.log("updateJobList----")
+                console.log(jobs);
                 var res = [];
 
                 for (let i = 0; i < jobs.length; i ++) {
@@ -140,18 +131,24 @@ export default class Joblist extends React.Component{
                         licenceNum: cur.licenceNum,
                         hubId: cur.hubId,
                         code: cur.code,
-                        status: cur.status
+                        status: cur.status,
+                        note: cur.note
                     };
                     res.push(temp);
                 }
-                // console.log(res);
+                console.log(jobs);
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
                 this.setState({job_data: res});
-
             });
     };
 
+    componentWillUnmount() {
+        clearInterval(this.timer);
+    }
+
     componentDidMount() {
         console.log("mounting!");
+        this.updateTimer = setInterval(() => this.updateJoblist(), 10000);
         this.updateJoblist();
         this.updateHubs();
 
@@ -165,36 +162,30 @@ export default class Joblist extends React.Component{
             }
         }
     }
-    
-    startTimer() {
-        if (this.timer === 0 && this.state.seconds > 0) {
-            this.timer = setInterval(this.countDown, 1000);
-        }
-    }
-    
-    countDown() {
-        // Remove one second, set state so a re-render happens.
-        let seconds = this.state.seconds - 1;
-        this.setState({
-            time: this.secondsToTime(seconds),
-            seconds: seconds,
-        });
-    
-        // Check if we're at zero.
-        if (seconds == 0) { 
-            clearInterval(this.timer);
-            this.state.scheduleBreak = false;
-            this.state.inBreak = false;
-        }
-    }
 
-    handleInBreak = () => {
-        this.startTimer();
-        return(
-            <div>
-              m: {this.state.time.m} s: {this.state.time.s}
-            </div>
-        );
+    handleInBreak = (id) => {
+        window.location.href = "/driver?stage=offWork&id="+id;
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(id)
+            .then(job => {
+                // window.alert(job.id);
+                if (!job) {
+                    window.alert("job not found!");
+                }
+                else {
+                    job.status = 12;
+                    return job;
+                }
+            })
+            .then (updated =>{
+                handler.asyncPostJob(updated)
+                    .then(response => {
+                        console.log("post job:");
+                        console.log(response);
+                        window.location.href = "/driver?stage=offWork&id="+response.jobId;
+                        return response;
+                    });
+            });
     }
 
     handleDropdown = (e) => {
@@ -204,13 +195,56 @@ export default class Joblist extends React.Component{
         console.log("tempBreakLength: "+e.target.value);
     }
 
-    handleBreak = () => {
+    handleBreak = (e) => {
         console.log("schedule a break");
-        this.setState({
-            scheduleBreak: true,
-            seconds: this.state.tempBreakLength * 60,
-            breakLength: this.state.tempBreakLength
-        });
+        var data = new Date();
+        let handler = new HTTPHandler();
+        fake_job.note = this.state.tempBreakLength;
+        // var scheduled_time = new Date();
+
+        handler.asyncGetDriverJobs("driver1")
+            .then(jobs => {
+                console.log("updateJobList----")
+                console.log(jobs);
+                var res = [];
+
+                for (let i = 0; i < jobs.length; i ++) {
+                    const cur = jobs[i];
+                    res.push(cur);
+                }
+
+                res.sort((a,b)=>(a.scheduledTime>b.scheduledTime)?1:-1);
+                if(res.length != 0){
+                    fake_job.scheduledTime = (parseInt(res[res.length - 1].scheduledTime)  > parseInt(Math.floor(data/1000))) ? (res[res.length - 1].scheduledTime + 1200).toString() : (Math.floor(data/1000)+600).toString()// the time a break is ok
+                }
+                else
+                {
+                    fake_job.scheduledTime =  (Math.floor(data/1000)+600).toString();
+                }
+                return fake_job;
+            })
+            .then(fake_job=>{
+                console.log(fake_job);
+                handler.asyncPostJob(fake_job)
+                    .then(response => {
+                        console.log("post job: \n"+response);
+                        console.log("advanceState "+ response.advanceState);
+                        // window.location.href = "/driver?stage=joblist";
+                    });
+            });
+        // data.setHours(data.getHours()+18*60);
+        // console.log(Math.floor(data/1000));
+        // console.log(data);
+        // scheduled_time.setMinutes(parseInt((data.getMinutes).toString()));
+        // fake_job.scheduledTime = Math.floor((data/1000)+1000).toString();
+
+
+        // this.updateJoblist();
+        // this.setState({
+        //     scheduleBreak: true,
+        //     seconds: this.state.tempBreakLength * 60,
+        //     breakLength: this.state.tempBreakLength
+        // });
     }
 
     handleTextField = (v) => {
@@ -271,29 +305,45 @@ export default class Joblist extends React.Component{
     tableRowClicked = (e, row) => {
         console.log("table row clicked");
         console.log("row id:"+row._row.data.id);
+        // console.log(data.status);
         var data = row._row.data;
         var hub = data.hubId
         var dpt = null;
-        for (var i = 0; i < this.state.hub_data.length; i++) {
-            if (this.state.hub_data[i].id === hub) {
-                dpt = this.state.hub_data[i].Description
-            }
-        }
-        this.setState({
-            type: data.type,
-            id: data.id,
-            status: data.status,
-            code: data.code,
-            hub: dpt,
-            carLocNote: data.note
-        });
+        var job_info = null;
+
+        let handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(data.id)
+            .then(job => {
+                console.log(job);
+                job_info = job;
+            })
+            .then(final_job=> {
+                for (var i = 0; i < this.state.hub_data.length; i++) {
+                    if (this.state.hub_data[i].id === hub) {
+                        dpt = this.state.hub_data[i].Description
+                    }
+                }
+                if (data.status === 2 || data.status === 7) {
+                    window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                }
+                else if (data.status === 3 || data.status ===8) {
+                    window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                }
+                else if (data.status === 4 || data.status ===9) {
+                    window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                }
+                else { // break
+
+                    window.location.href = "/driver?stage=break&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                }
+            });
     };
 
     handleDropOff = () => {
         if (this.state.status === -1) {
             return (
                 <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
+                    <Grid container component="main" sx={{ height: '105vh' }}>
                         <CssBaseline />
                         <Grid
                             item
@@ -306,7 +356,7 @@ export default class Joblist extends React.Component{
                                 backgroundPosition: 'center',
                             }}
                         >
-                            <div data-testid="test-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+                            <div data-testid="test-table" id="hubTableContainerstyle" style={{"width":"100%", "height":"100%"}}>
                                 <ReactTabulator
                                     columns={table_columns}
                                     data={this.state.job_data}
@@ -370,369 +420,230 @@ export default class Joblist extends React.Component{
                 </ThemeProvider>
             );
         }
-        else if (this.state.status === 0 && this.state.type === 1) {
-
-
-        }
-        else if (this.state.status === 1 && this.state.type === 1) {
-            return (
-                <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
-                        <CssBaseline />
-                        <Grid
-                            item
-                            xs={false}
-                            sm={4}
-                            md={7}
-                            sx={{
-                                backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }}
-                        >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
-                                <ReactTabulator
-                                    columns={table_columns}
-                                    data={this.state.job_data}
-                                    rowClick={this.tableRowClicked}
-                                    className="jobClass"
-                                />
-                            </div>
-                            {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                            <Box
-                                sx={{
-                                    my: 8,
-                                    mx: 4,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Typography component="h1" variant="h5">
-                                    Park the Car ...
-                                </Typography>
-                                Additional Note for Location:
-                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                    <TextField
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        id="note"
-                                        label="note"
-                                        name="note"
-                                        autoComplete="note"
-                                        onChange={(event) => this.handleTextField(event.target.value)}
-                                        autoFocus
-                                    />
-                                    <br/>
-                                    <br/>
-                                    <Button
-                                        onClick={this.handleParkConfirm}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        confirm
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </ThemeProvider>
-            );
-        }
-        else if (this.state.status === 2 && this.state.type === 1) { // drop key
-            return(
-                <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
-                        <CssBaseline />
-                        <Grid
-                            item
-                            xs={false}
-                            sm={4}
-                            md={7}
-                            sx={{
-                                backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }}
-                        >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
-                                <ReactTabulator
-                                    columns={table_columns}
-                                    data={this.state.job_data}
-                                    rowClick={this.tableRowClicked}
-                                    className="jobClass"
-                                />
-                            </div>
-                            {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                            <Box
-                                sx={{
-                                    my: 8,
-                                    mx: 4,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Typography component="h1" variant="h5">
-                                    Drop Key Off at ...
-                                </Typography>
-                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                    Address:
-                                    <br/>
-                                    {this.state.hub}
-                                    <br/>
-                                    <br/>
-                                    Verification Code:
-                                    <br/>
-                                    {this.state.code}
-                                    <br/>
-                                    <Button
-                                        onClick={this.handleKeyConfirm}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        Confirm
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </ThemeProvider>
-            );
-        }
         // ------ FOR PICK UP TASK ------
-        else if (this.state.status === 0 && this.state.type === 2) {
-            return(
-                <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
-                        <CssBaseline />
-                        <Grid
-                            item
-                            xs={false}
-                            sm={4}
-                            md={7}
-                            sx={{
-                                backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }}
-                        >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
-                                <ReactTabulator
-                                    columns={table_columns}
-                                    data={this.state.job_data}
-                                    rowClick={this.tableRowClicked}
-                                    className="jobClass"
-                                />
-                            </div>
-                            {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                            <Box
-                                sx={{
-                                    my: 8,
-                                    mx: 4,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Typography component="h1" variant="h5">
-                                    Pick Key Up at ...
-                                </Typography>
-                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                    Address:
-                                    <br/>
-                                    {this.state.hub}
-                                    <br/>
-                                    <br/>
-                                    Verification Code:
-                                    <br/>
-                                    {this.state.code}
-                                    <br/>
-                                    <Button
-                                        onClick={this.handleConfirm}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        Confirm
-                                    </Button>
-                                    <Button
-                                        onClick={this.handleBackClick}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        Back
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </ThemeProvider>
-            );
-
-        }
-        else if (this.state.status === 1 && this.state.type === 2) {
-            return (
-                <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
-                        <CssBaseline />
-                        <Grid
-                            item
-                            xs={false}
-                            sm={4}
-                            md={7}
-                            sx={{
-                                backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }}
-                        >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
-                                <ReactTabulator
-                                    columns={table_columns}
-                                    data={this.state.job_data}
-                                    rowClick={this.tableRowClicked}
-                                    className="jobClass"
-                                />
-                            </div>
-                            {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                            <Box
-                                sx={{
-                                    my: 8,
-                                    mx: 4,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Typography component="h1" variant="h5">
-                                    Take the Car Out from...
-                                </Typography>
-                                Note for Location:
-                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                    <TextField
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        id="note"
-                                        label="note"
-                                        name="note"
-                                        autoComplete="note"
-                                        value={this.state.carLocNote}
-                                        onChange={(event) => this.handleTextField(event.target.value)}
-                                        autoFocus
-                                        disabled
-                                    />
-                                    {/*<p>{this.state.carLocNote}</p>*/}
-                                    <br/>
-                                    <br/>
-                                    <Button
-                                        onClick={this.handleParkConfirm}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        confirm
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </ThemeProvider>
-            );
-        }
-        else if (this.state.status === 2 && this.state.type === 2) { // drop key
-            return(
-                <ThemeProvider theme={theme}>
-                    <Grid container component="main" sx={{ height: '100vh' }}>
-                        <CssBaseline />
-                        <Grid
-                            item
-                            xs={false}
-                            sm={4}
-                            md={7}
-                            sx={{
-                                backgroundRepeat: 'no-repeat',
-                                backgroundSize: 'cover',
-                                backgroundPosition: 'center',
-                            }}
-                        >
-                            <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
-                                <ReactTabulator
-                                    columns={table_columns}
-                                    data={this.state.job_data}
-                                    rowClick={this.tableRowClicked}
-                                    className="jobClass"
-                                />
-                            </div>
-                            {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
-                        </Grid>
-                        <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-                            <Box
-                                sx={{
-                                    my: 8,
-                                    mx: 4,
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    alignItems: 'center',
-                                }}
-                            >
-                                <Typography component="h1" variant="h5">
-                                    Drop Car Off at ...
-                                </Typography>
-                                <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
-                                    Address:
-                                    <br/>
-                                    {this.state.hub}
-                                    <br/>
-                                    <br/>
-                                    Verification Code:
-                                    <br/>
-                                    {this.state.code}
-                                    <br/>
-                                    <Button
-                                        onClick={this.handleKeyConfirm}
-                                        fullWidth
-                                        variant="contained"
-                                        sx={{ mt: 3, mb: 2 }}
-                                    >
-                                        Confirm
-                                    </Button>
-                                </Box>
-                            </Box>
-                        </Grid>
-                    </Grid>
-                </ThemeProvider>
-            );
-        }
+        // else if (this.state.status === 0 && this.state.type === 2) {
+        //     return(
+        //         <ThemeProvider theme={theme}>
+        //             <Grid container component="main" sx={{ height: '100vh' }}>
+        //                 <CssBaseline />
+        //                 <Grid
+        //                     item
+        //                     xs={false}
+        //                     sm={4}
+        //                     md={7}
+        //                     sx={{
+        //                         backgroundRepeat: 'no-repeat',
+        //                         backgroundSize: 'cover',
+        //                         backgroundPosition: 'center',
+        //                     }}
+        //                 >
+        //                     <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+        //                         <ReactTabulator
+        //                             columns={table_columns}
+        //                             data={this.state.job_data}
+        //                             rowClick={this.tableRowClicked}
+        //                             className="jobClass"
+        //                         />
+        //                     </div>
+        //                     {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
+        //                 </Grid>
+        //                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        //                     <Box
+        //                         sx={{
+        //                             my: 8,
+        //                             mx: 4,
+        //                             display: 'flex',
+        //                             flexDirection: 'column',
+        //                             alignItems: 'center',
+        //                         }}
+        //                     >
+        //                         <Typography component="h1" variant="h5">
+        //                             Pick Key Up at ...
+        //                         </Typography>
+        //                         <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
+        //                             Address:
+        //                             <br/>
+        //                             {this.state.hub}
+        //                             <br/>
+        //                             <br/>
+        //                             Verification Code:
+        //                             <br/>
+        //                             {this.state.code}
+        //                             <br/>
+        //                             <Button
+        //                                 onClick={this.handleConfirm}
+        //                                 fullWidth
+        //                                 variant="contained"
+        //                                 sx={{ mt: 3, mb: 2 }}
+        //                             >
+        //                                 Confirm
+        //                             </Button>
+        //                             <Button
+        //                                 onClick={this.handleBackClick}
+        //                                 fullWidth
+        //                                 variant="contained"
+        //                                 sx={{ mt: 3, mb: 2 }}
+        //                             >
+        //                                 Back
+        //                             </Button>
+        //                         </Box>
+        //                     </Box>
+        //                 </Grid>
+        //             </Grid>
+        //         </ThemeProvider>
+        //     );
+        //
+        // }
+        // else if (this.state.status === 1 && this.state.type === 2) {
+        //     return (
+        //         <ThemeProvider theme={theme}>
+        //             <Grid container component="main" sx={{ height: '100vh' }}>
+        //                 <CssBaseline />
+        //                 <Grid
+        //                     item
+        //                     xs={false}
+        //                     sm={4}
+        //                     md={7}
+        //                     sx={{
+        //                         backgroundRepeat: 'no-repeat',
+        //                         backgroundSize: 'cover',
+        //                         backgroundPosition: 'center',
+        //                     }}
+        //                 >
+        //                     <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+        //                         <ReactTabulator
+        //                             columns={table_columns}
+        //                             data={this.state.job_data}
+        //                             rowClick={this.tableRowClicked}
+        //                             className="jobClass"
+        //                         />
+        //                     </div>
+        //                     {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
+        //                 </Grid>
+        //                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        //                     <Box
+        //                         sx={{
+        //                             my: 8,
+        //                             mx: 4,
+        //                             display: 'flex',
+        //                             flexDirection: 'column',
+        //                             alignItems: 'center',
+        //                         }}
+        //                     >
+        //                         <Typography component="h1" variant="h5">
+        //                             Take the Car Out from...
+        //                         </Typography>
+        //                         Note for Location:
+        //                         <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
+        //                             <TextField
+        //                                 margin="normal"
+        //                                 required
+        //                                 fullWidth
+        //                                 id="note"
+        //                                 label="note"
+        //                                 name="note"
+        //                                 autoComplete="note"
+        //                                 value={this.state.carLocNote}
+        //                                 onChange={(event) => this.handleTextField(event.target.value)}
+        //                                 autoFocus
+        //                                 disabled
+        //                             />
+        //                             {/*<p>{this.state.carLocNote}</p>*/}
+        //                             <br/>
+        //                             <br/>
+        //                             <Button
+        //                                 onClick={this.handleParkConfirm}
+        //                                 fullWidth
+        //                                 variant="contained"
+        //                                 sx={{ mt: 3, mb: 2 }}
+        //                             >
+        //                                 confirm
+        //                             </Button>
+        //                         </Box>
+        //                     </Box>
+        //                 </Grid>
+        //             </Grid>
+        //         </ThemeProvider>
+        //     );
+        // }
+        // else if (this.state.status === 2 && this.state.type === 2) { // drop key
+        //     return(
+        //         <ThemeProvider theme={theme}>
+        //             <Grid container component="main" sx={{ height: '100vh' }}>
+        //                 <CssBaseline />
+        //                 <Grid
+        //                     item
+        //                     xs={false}
+        //                     sm={4}
+        //                     md={7}
+        //                     sx={{
+        //                         backgroundRepeat: 'no-repeat',
+        //                         backgroundSize: 'cover',
+        //                         backgroundPosition: 'center',
+        //                     }}
+        //                 >
+        //                     <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+        //                         <ReactTabulator
+        //                             columns={table_columns}
+        //                             data={this.state.job_data}
+        //                             rowClick={this.tableRowClicked}
+        //                             className="jobClass"
+        //                         />
+        //                     </div>
+        //                     {this.state.scheduleBreak && <p>You have schedule a break for {this.state.breakLength} minutes after you finish all existing jobs.</p>}
+        //                 </Grid>
+        //                 <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
+        //                     <Box
+        //                         sx={{
+        //                             my: 8,
+        //                             mx: 4,
+        //                             display: 'flex',
+        //                             flexDirection: 'column',
+        //                             alignItems: 'center',
+        //                         }}
+        //                     >
+        //                         <Typography component="h1" variant="h5">
+        //                             Drop Car Off at ...
+        //                         </Typography>
+        //                         <Box data-testid="test-button" component="form" noValidate sx={{ mt: 1 }}>
+        //                             Address:
+        //                             <br/>
+        //                             {this.state.hub}
+        //                             <br/>
+        //                             <br/>
+        //                             Verification Code:
+        //                             <br/>
+        //                             {this.state.code}
+        //                             <br/>
+        //                             <Button
+        //                                 onClick={this.handleKeyConfirm}
+        //                                 fullWidth
+        //                                 variant="contained"
+        //                                 sx={{ mt: 3, mb: 2 }}
+        //                             >
+        //                                 Confirm
+        //                             </Button>
+        //                         </Box>
+        //                     </Box>
+        //                 </Grid>
+        //             </Grid>
+        //         </ThemeProvider>
+        //     );
+        // }
     }
 
     render(){
         console.log("current status")
-        console.log(this.state.job_data);
-        console.log(this.state.hub_data);
-        // console.log(this.props);
-        console.log(this.state.status);
-        console.log(this.state.tempBreakLength);
-        console.log("inBreak? "+this.state.inBreak);
-        if (this.state.inBreak) {
-            return this.handleInBreak();
+        console.log(this.state);
+
+        const [first] = this.state.job_data;
+        console.log(first);
+        if (this.state.job_data.length != 0 && first.type === 3 && first.status != 13) {
+            var time = new Date();
+            const len = Math.floor(time / 1000) + first.note * 60;
+            window.location.href = "/driver?stage=offwork&id=" + first.id.toString() + "&len=" + len.toString();
         }
         else {return this.handleDropOff();}
-
-
     }
 }
 

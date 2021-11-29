@@ -1,0 +1,102 @@
+/* notification line */
+.MuiGrid-root.MuiGrid-container.MuiGrid-spacing-xs-undefined.css-jn8btq-MuiGrid-root{
+  padding-left: 30px;
+  /*background-image: url('./images/parking.jpg');*/
+  background-repeat: no-repeat;
+  background-position: relative;
+  opacity: 0.8;
+}
+
+/* button */
+.MuiBox-root.css-164r41r{
+  padding-left: 30px;
+}
+
+.MuiBox-root.css-164r41r:hover{
+  color: black;
+}
+
+/*#images.bottom{
+  height: 1000px;
+  width: 1000px;
+}*/
+
+#images{
+  position:relative;
+  height:1000px;
+  width: 1000px;
+  /*max-width: 100%;*/
+  margin:0;
+  size: 2000px;
+}
+
+#images img {
+  position:absolute;
+  left:0;
+  transition-property: opacity;
+  transition-timing-function: ease-in-out;
+  transition-duration: 20s;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  #images img.bottom {
+  animation-name: trans;
+  animation-duration: 10s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  }
+
+#images img.top{
+  animation-name: trans2;
+  animation-delay: 10s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-direction: alternate;
+  }
+
+}
+
+@keyframes trans {
+  0% {
+  opacity:1;
+}
+45% {
+opacity:1;
+}
+75% {
+opacity:0;
+}
+100% {
+opacity:0;
+}
+}
+
+@keyframes trans2 {
+  0% {
+  opacity:1;
+}
+45% {
+opacity:1;
+}
+75% {
+opacity:0;
+}
+100% {
+opacity:0;
+}
+}
+
+/*.clock {
+  background-color: #fff; 
+  background-image: url('./images/clock.svg'); 
+  background-repeat: no-repeat;
+  border-radius: 50%; 
+  background-position: center;
+  background-size: 88%;
+  height: 20em;
+  padding-bottom: 31%;
+  position: relative;
+  width: 20em;
+}
+*/

@@ -39,7 +39,6 @@ export default function LogInImage() {
         const userPath = "/customer?stage=schedule";
         const partnerPath = "/driver?stage=joblist";
 
-
         setTimeout(function() {
             if ($(".Dropdown-placeholder").html() === "Partner") {
                 window.location.href=partnerPath;
@@ -47,7 +46,6 @@ export default function LogInImage() {
                 window.location.href=userPath;
             }
         }, 1500);
-
     };
 
     return (
