@@ -206,12 +206,8 @@ export default class PickCar extends React.Component{
 
     handleSubmit = (event) => {
         event.preventDefault();
-        const data = new FormData(event.currentTarget);
-
         var jobId = parseInt((new URL(window.location.href)).searchParams.get("id"));
-        var code = data.get('code').toString();
-
-
+        
         window.location.href = "/customer?stage=car&id=" + jobId;
     };
 
@@ -253,7 +249,7 @@ export default class PickCar extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Pick key up
                             </Typography>
-                            <Box data-testid="schedule-form" onSubmit={this.handleSubmit} component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
                                 Address: <br></br>
                                 {this.state.address}<br></br>
                                 <br></br>
@@ -275,6 +271,7 @@ export default class PickCar extends React.Component{
                                 <Button
                                     // type="submit"
                                     fullWidth
+                                    onClick={this.handleSubmit}
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
                                 >

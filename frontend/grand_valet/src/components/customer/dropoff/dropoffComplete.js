@@ -223,7 +223,7 @@ export default class DropoffComplete extends React.Component{
                         }}
                     >
                         <div style={{display: 'flex',  justifyContent:'center', "width":"100%", "height":"100%"}}>
-                            <Map data-testid="schedule-map" center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd} chosen_lat={this.state.chosen_lat} chosen_lng={this.state.chosen_lng}/>
+                            <Map data-testid="complete-map" center_lat={this.state.user_lat} center_lng={this.state.user_lng} marker_crd={this.state.marker_crd} chosen_lat={this.state.chosen_lat} chosen_lng={this.state.chosen_lng}/>
                         </div>
                     </Grid>
                     <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
@@ -242,7 +242,7 @@ export default class DropoffComplete extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Schedule Pick Up
                             </Typography>
-                            <Box data-testid="schedule-form" onSubmit={this.handleSubmit} component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="complete-form" onSubmit={this.handleSubmit} component="form" noValidate sx={{ mt: 1 }} >
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     <TextField
                                         margin="normal"
@@ -277,7 +277,7 @@ export default class DropoffComplete extends React.Component{
                                 </Button>
 
                             </Box>
-                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="complete-form" component="form" noValidate sx={{ mt: 1 }} >
                                 <Button
                                     // type="submit"
                                     fullWidth
