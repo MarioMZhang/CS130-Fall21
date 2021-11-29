@@ -17,6 +17,7 @@ import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
 import {HTTPHandler} from './../util/http';
 import Map from './../util/map';
+import './driving.css';
 
 const theme = createTheme();
 const table_columns = [
@@ -251,7 +252,7 @@ export default class Driving extends React.Component {
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"50%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"100%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={this.state.job_data}
