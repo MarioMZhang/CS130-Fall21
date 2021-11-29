@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
+import {HTTPHandler} from "../../util/http";
 
 
 // import TimePicker from 'react-time-picker';
@@ -173,9 +174,35 @@ export default class PickCar extends React.Component{
 
         this.setState({
             marker_crd: marker_crd
-        })
+        });
 
+        var id = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        var handler = new HTTPHandler();
+        handler.getJobsFromID(id)
+            .then(response => {
+                if (response.carLocation !== null) {
+                    this.setState({
+                        address: response.carLocation
+                    });
+                } else {
+                    this.setState({
+                        address: "An empty note for testing purpose"
+                    });
+                }
+            })
     }
+
+    handleSubmit = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+
+        var jobId = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        var code = data.get('code').toString();
+
+
+        window.location.href = "/customer?stage=car&id=" + jobId;
+    };
+
 
     //add table holder element to DOM
     render(){
@@ -214,13 +241,13 @@ export default class PickCar extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Pick key up
                             </Typography>
-                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" onSubmit={this.handleSubmit} component="form" noValidate sx={{ mt: 1 }} >
                                 Address: <br></br>
                                 {this.state.address}<br></br>
                                 <br></br>
                                 Verification code:
                                 <div style={{display:"flex", flexDirection:"row"}}>
-                                    
+
                                     <TextField
                                         margin="normal"
                                         required
@@ -229,12 +256,11 @@ export default class PickCar extends React.Component{
                                         id="code"
                                         autoFocus
                                         style={{padding:5}}
-                                        disabled
                                         defaultValue={this.state.code}
                                     />
                                 </div>
                                 <Button
-                                    type="submit"
+                                    // type="submit"
                                     fullWidth
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}

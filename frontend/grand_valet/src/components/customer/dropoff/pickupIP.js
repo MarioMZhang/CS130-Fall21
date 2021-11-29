@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
+import {HTTPHandler} from "../../util/http";
 
 
 // import TimePicker from 'react-time-picker';
@@ -143,6 +144,42 @@ export default class PickupIP extends React.Component{
         });
     };
 
+    handleCodeSubmit = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+
+        var jobId = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        var code = parseInt(data.get('code'));
+        console.log(code);
+
+        var handler = new HTTPHandler();
+        handler.asyncGetJobsFromID(jobId)
+            .then(response => {
+                response.advanceState = [response.advanceState[0], 1];
+                return response;
+            })
+            .then(updated => {
+                if (code === parseInt(updated.code)) {
+                    handler.asyncPostJob(updated)
+                        .then(response => {
+                            console.log(response);
+                            if (response.hasOwnProperty("jobId")) {
+                                console.log("success");
+                                // advance only when both customer and driver confirm
+                                if (response.advanceState === [1, 1]) {
+                                    window.location.href = "/customer?stage=schedule";
+                                }
+                            } else {
+                                window.alert("Failed to update verification code.");
+                            }
+                        })
+                        .catch(err => console.log(err.toString()));
+                } else {
+                    window.alert("The verification codes doesn't match. Please double check with ur driver.");
+                }
+            })
+            .catch(err => console.log(err.toString()));
+    };
 
     componentDidMount() {
         // retrieve list of hubs.
@@ -216,10 +253,10 @@ export default class PickupIP extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Pick up in progress
                             </Typography>
-                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" component="form" onSubmit={this.handleCodeSubmit} noValidate sx={{ mt: 1 }} >
                                 Verification code:
                                 <div style={{display:"flex", flexDirection:"row"}}>
-                                    
+
                                     <TextField
                                         margin="normal"
                                         required
@@ -228,7 +265,6 @@ export default class PickupIP extends React.Component{
                                         id="code"
                                         autoFocus
                                         style={{padding:5}}
-                                        disabled
                                         defaultValue={this.state.code}
                                     />
                                 </div>

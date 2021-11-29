@@ -31,17 +31,23 @@ export default function LogInImage() {
         console.log({
             email: data.get('email'),
             password: data.get('password'),
-            identity: $(".Dropdown-placeholder").html(),
         });
 
         // todo: HTTP GET/POST: /login
         // todo: authenticate and redirect based on
 
         const userPath = "/customer?stage=schedule";
-        const partnerPath = "/partner?stage=schedule";
+        const partnerPath = "/driver?stage=joblist";
 
-        // for now, login as user
-        window.location.href=userPath;
+
+        setTimeout(function() {
+            if ($(".Dropdown-placeholder").html() === "Partner") {
+                window.location.href=partnerPath;
+            } else {
+                window.location.href=userPath;
+            }
+        }, 1500);
+
     };
 
     return (
@@ -115,16 +121,16 @@ export default function LogInImage() {
                                 Sign In
                             </Button>
                             <Grid container>
-                                <Grid item xs>
-                                    <Link href="#" variant="body2">
-                                        Forgot password?
-                                    </Link>
-                                </Grid>
-                                <Grid item>
-                                    <Link href="/signup" variant="body2">
-                                        {"Don't have an account? Sign Up"}
-                                    </Link>
-                                </Grid>
+                                {/*<Grid item xs>*/}
+                                {/*    <Link href="#" variant="body2">*/}
+                                {/*        Forgot password?*/}
+                                {/*    </Link>*/}
+                                {/*</Grid>*/}
+                                {/*<Grid item>*/}
+                                {/*    <Link href="/signup" variant="body2">*/}
+                                {/*        {"Don't have an account? Sign Up"}*/}
+                                {/*    </Link>*/}
+                                {/*</Grid>*/}
                             </Grid>
                         </Box>
                     </Box>

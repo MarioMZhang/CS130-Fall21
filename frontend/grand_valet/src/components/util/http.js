@@ -73,7 +73,7 @@ export class HTTPHandler {
 
     postJob(data) {
         const url = "http://localhost:3000/api/jobs";
-        console.log(data);
+        console.log(JSON.stringify(data));
 
         return new Promise(resolve => {
             fetch(url, {method: "POST", headers: this.headers, body: JSON.stringify(data)})

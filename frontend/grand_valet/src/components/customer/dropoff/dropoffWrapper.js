@@ -16,7 +16,7 @@ export default function CustomerDropoffWrapper() {
     } else if (searchParam.includes("complete")) {
         component = <DropoffComplete/>;
     }
-    else if (searchParam.includes("ip2")) {
+    else if (searchParam.includes("pickup")) {
         component = <PickupIP/>;
     }
     else if (searchParam.includes("key")) {

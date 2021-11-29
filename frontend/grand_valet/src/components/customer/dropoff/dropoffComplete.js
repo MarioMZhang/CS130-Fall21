@@ -1,20 +1,18 @@
 import React from "react";
 import './dropoffSChedule.css';
 import 'react-tabulator/lib/styles.css';
-import { ReactTabulator } from 'react-tabulator'
 import 'react-tabulator/css/bootstrap/tabulator_bootstrap.min.css';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
 import Paper from '@mui/material/Paper';
 import Box from '@mui/material/Box';
 import Grid from '@mui/material/Grid';
 import Typography from '@mui/material/Typography';
-import { createTheme, ThemeProvider } from '@mui/material/styles';
-import TimePicker from 'rc-time-picker';
+import {createTheme, ThemeProvider} from '@mui/material/styles';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
+import {HTTPHandler} from "../../util/http";
 
 
 // import TimePicker from 'react-time-picker';
@@ -25,8 +23,6 @@ import Map from './../../util/map';
 
 
 const theme = createTheme();
-
-const state_options = ["California", "New York"];
 
 
 const dummyHubs = [
@@ -140,11 +136,44 @@ export default class DropoffComplete extends React.Component{
         });
     };
 
+    handleSubmit = (event) => {
+        event.preventDefault();
+        const data = new FormData(event.currentTarget);
+
+        var jobId = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        var scheduled_time = new Date();
+        scheduled_time.setHours(parseInt(data.get('hour').toString()));
+        scheduled_time.setMinutes(parseInt(data.get('minute').toString()));
+
+        var handler = new HTTPHandler();
+        handler.getJobsFromID(jobId)
+            .then(response => {
+                response.type = 2;
+                response.jobId = 0;
+                response.status = 0;
+                response.advanceState = [0, 0];
+                response.scheduledTime = Math.floor(scheduled_time.getTime() / 1000);
+
+                handler.asyncPostJob(response)
+                    .then(postResponse => {
+                        if (postResponse.hasOwnProperty("jobId")) {
+                            window.location.href = "/customer?stage=ip2&id=" + postResponse.jobId;
+                        } else {
+                            window.alert("Failed to create new pick up job.");
+                        }
+                    })
+            })
+    };
+
+    handleSelfPickUp = () => {
+        var jobId = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        window.location.href = "/customer?stage=key&id=" + jobId.toString();
+    };
 
     componentDidMount() {
         // retrieve list of hubs.
         // convert response body into table data.
-
+        console.log("new");
         if (navigator.geolocation) {
             navigator.permissions
                 .query({ name: "geolocation" })
@@ -178,6 +207,7 @@ export default class DropoffComplete extends React.Component{
 
         return (
             <ThemeProvider theme={theme}>
+                {console.log("what about now")}
                 <Grid container component="main" sx={{ height: '100vh' }}>
                     <CssBaseline />
                     <Grid
@@ -210,7 +240,7 @@ export default class DropoffComplete extends React.Component{
                             <Typography component="h1" variant="h5">
                                 Schedule Pick Up
                             </Typography>
-                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
+                            <Box data-testid="schedule-form" onSubmit={this.handleSubmit} component="form" noValidate sx={{ mt: 1 }} >
                                 <div style={{display:"flex", flexDirection:"row"}}>
                                     <TextField
                                         margin="normal"
@@ -221,8 +251,6 @@ export default class DropoffComplete extends React.Component{
                                         id="hour"
                                         autoFocus
                                         style={{padding:5}}
-                                        //disabled={this.state.chosen_hub === null}
-
                                     />
 
                                     <TextField
@@ -234,8 +262,6 @@ export default class DropoffComplete extends React.Component{
                                         id="minute"
                                         autoFocus
                                         style={{padding:5}}
-                                        //disabled={this.state.chosen_hub === null}
-
                                     />
                                 </div>
                                 <Button
@@ -243,12 +269,17 @@ export default class DropoffComplete extends React.Component{
                                     fullWidth
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
+
                                 >
                                     Submit Request
                                 </Button>
+
+                            </Box>
+                            <Box data-testid="schedule-form" component="form" noValidate sx={{ mt: 1 }} >
                                 <Button
-                                    type="submit"
+                                    // type="submit"
                                     fullWidth
+                                    onClick={this.handleSelfPickUp}
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}
                                 >

@@ -15,6 +15,7 @@ import { createTheme, ThemeProvider } from '@mui/material/styles';
 import TimePicker from 'rc-time-picker';
 import 'rc-time-picker/assets/index.css';
 import Map from './../../util/map';
+import {HTTPHandler} from "../../util/http";
 
 
 // import TimePicker from 'react-time-picker';
@@ -176,9 +177,44 @@ export default class TakeCar extends React.Component{
 
         this.setState({
             marker_crd: marker_crd
-        })
+        });
 
+        var id = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        console.log(id);
+        var handler = new HTTPHandler();
+        handler.getJobsFromID(id)
+            .then(response => {
+                if (response.note !== null) {
+                    this.setState({
+                        note: response.note
+                    });
+                } else {
+                    this.setState({
+                        note: "An empty note for testing purpose"
+                    });
+                }
+            })
     }
+
+    handleSubmit = () => {
+        var id = parseInt((new URL(window.location.href)).searchParams.get("id"));
+        var handler = new HTTPHandler();
+        handler.getJobsFromID(id)
+            .then(response => {
+                response.status = 13;
+                return response;
+            })
+            .then(updated => {
+                handler.asyncPostJob(updated)
+                    .then(response => {
+                        console.log(response);
+                        window.location.href = "/customer?stage=schedule";
+                    })
+                    .catch(err => console.log(err.toString()))
+            })
+            .catch(err => console.log(err.toString()));
+
+    };
 
     //add table holder element to DOM
     render(){
@@ -221,7 +257,8 @@ export default class TakeCar extends React.Component{
                                 Note for location: <br></br>
                                 {this.state.note}
                                 <Button
-                                    type="submit"
+                                    // type="submit"
+                                    onClick={this.handleSubmit}
                                     fullWidth
                                     variant="contained"
                                     sx={{ mt: 3, mb: 2 }}

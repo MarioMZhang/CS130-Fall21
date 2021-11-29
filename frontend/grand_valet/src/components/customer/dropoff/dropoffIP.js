@@ -122,7 +122,7 @@ export default class DropoffIP extends React.Component{
         var handler = new HTTPHandler();
         handler.asyncGetJobsFromID(jobId)
             .then(response => {
-                response.advanceState = [1, 0];
+                response.advanceState = [response.advanceState[0], 1];
                 return response;
             })
             .then(updated => {
