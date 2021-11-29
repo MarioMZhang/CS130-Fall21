@@ -252,7 +252,7 @@ export default class Driving extends React.Component {
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"100%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"50%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={this.state.job_data}
