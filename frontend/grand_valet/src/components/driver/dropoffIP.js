@@ -15,6 +15,7 @@ import Select from '@mui/material/Select';
 import MenuItem from '@mui/material/MenuItem';
 import InputLabel from '@mui/material/InputLabel';
 import FormControl from '@mui/material/FormControl';
+import './dropoffIP.css';
 import {HTTPHandler} from './../util/http';
 const theme = createTheme();
 const table_columns = [
@@ -244,7 +245,7 @@ export default class DropoffIP extends React.Component {
                             backgroundPosition: 'center',
                         }}
                     >
-                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"80%"}}>
+                        <div id="hubTableContainerstyle" style={{"width":"100%", "height":"100%"}}>
                             <ReactTabulator
                                 columns={table_columns}
                                 data={this.state.job_data}
