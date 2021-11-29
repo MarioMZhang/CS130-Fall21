@@ -207,7 +207,6 @@ export default class DropoffComplete extends React.Component{
 
         return (
             <ThemeProvider theme={theme}>
-                {console.log("what about now")}
                 <Grid container component="main" sx={{ height: '100vh' }}>
                     <CssBaseline />
                     <Grid
@@ -237,6 +236,9 @@ export default class DropoffComplete extends React.Component{
                                 alignItems: 'center',
                             }}
                         >
+                            <Typography component="h1" variant="h5">
+                                Your driver has parked your car!
+                            </Typography>
                             <Typography component="h1" variant="h5">
                                 Schedule Pick Up
                             </Typography>
