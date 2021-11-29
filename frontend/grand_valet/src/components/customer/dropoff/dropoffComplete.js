@@ -157,7 +157,7 @@ export default class DropoffComplete extends React.Component{
                 handler.asyncPostJob(response)
                     .then(postResponse => {
                         if (postResponse.hasOwnProperty("jobId")) {
-                            window.location.href = "/customer?stage=ip2&id=" + postResponse.jobId;
+                            window.location.href = "/customer?stage=pickup&id=" + postResponse.jobId;
                         } else {
                             window.alert("Failed to create new pick up job.");
                         }

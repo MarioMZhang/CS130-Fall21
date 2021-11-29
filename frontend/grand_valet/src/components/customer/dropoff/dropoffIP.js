@@ -123,7 +123,7 @@ export default class DropoffIP extends React.Component{
         var handler = new HTTPHandler();
         handler.asyncGetJobsFromID(jobId)
             .then(response => {
-                response.advanceState = [response.advanceState[0], 1];
+                response.advanceState = [1, response.advanceState[1]];
                 return response;
             })
             .then(updated => {
@@ -132,9 +132,10 @@ export default class DropoffIP extends React.Component{
                         .then(response => {
                             if (response.hasOwnProperty("jobId")) {
                                 console.log("success");
+                                console.log(response.advanceState);
                                 // advance only when both customer and driver confirm
-                                if (response.advanceState === [1, 1]) {
-                                    window.location.href = "/customer?stage=ip&id=" + response.jobId.toString();
+                                if (response.advanceState[0] === 1 && response.advanceState[1] === 1) {
+                                    window.location.href = "/customer?stage=complete&id=" + response.jobId.toString();
                                 }
                             } else {
                                 window.alert("Failed to create new job.");

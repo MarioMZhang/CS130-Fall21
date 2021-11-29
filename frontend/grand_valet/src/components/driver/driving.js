@@ -199,14 +199,14 @@ export default class Driving extends React.Component {
                     }
                 }
                 if (data.status === 2 || data.status === 7) {
-                    window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                    window.location.href = "/driver?stage=ip&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + job_info.status + "&loc=" + job_info.note + "&type=" + data.type;
                 } else if (data.status === 3 || data.status === 8) {
-                    window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                    window.location.href = "/driver?stage=driving&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + job_info.status + "&loc=" + data.note + "&type=" + data.type;
                 } else if (data.status === 4 || data.status === 9) {
-                    window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + data.note + "&type=" + data.type;
+                    window.location.href = "/driver?stage=complete&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + job_info.status + "&loc=" + data.note + "&type=" + data.type;
                 } else { // break
 
-                    window.location.href = "/driver?stage=break&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + data.status + "&loc=" + job_info.note + "&type=" + data.type;
+                    window.location.href = "/driver?stage=break&id=" + data.id + "&code=" + data.code + "&hubId=" + data.hubId + "&dpt=" + dpt + "&status=" + job_info.status + "&loc=" + job_info.note + "&type=" + data.type;
                 }
             });
     };

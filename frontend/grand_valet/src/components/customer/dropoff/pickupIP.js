@@ -155,7 +155,7 @@ export default class PickupIP extends React.Component{
         var handler = new HTTPHandler();
         handler.asyncGetJobsFromID(jobId)
             .then(response => {
-                response.advanceState = [response.advanceState[0], 1];
+                response.advanceState = [1, response.advanceState[1]];
                 return response;
             })
             .then(updated => {
@@ -166,7 +166,7 @@ export default class PickupIP extends React.Component{
                             if (response.hasOwnProperty("jobId")) {
                                 console.log("success");
                                 // advance only when both customer and driver confirm
-                                if (response.advanceState === [1, 1]) {
+                                if (response.advanceState[0] === 1 && response.advanceState[1] === 1) {
                                     window.location.href = "/customer?stage=schedule";
                                 }
                             } else {

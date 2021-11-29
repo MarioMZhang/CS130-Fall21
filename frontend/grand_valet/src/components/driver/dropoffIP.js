@@ -216,7 +216,7 @@ export default class DropoffIP extends React.Component {
             code: parseInt((new URL(window.location.href)).searchParams.get("code")),
             hubId: parseInt((new URL(window.location.href)).searchParams.get("hubId")),
             hub: (new URL(window.location.href)).searchParams.get("dpt").toString(),
-            carLocNote: ((new URL(window.location.href)).searchParams.get("note")?(new URL(window.location.href)).searchParams.get("note").toString():null),
+            carLocNote: ((new URL(window.location.href)).searchParams.get("note")?(new URL(window.location.href)).searchParams.get("loc").toString():null),
             scheduleBreak: false,
             breakLength: 0,
             tempBreakLength: 10,
@@ -305,7 +305,7 @@ export default class DropoffIP extends React.Component {
 
     render(){
         console.log("current status")
-
+        console.log(this.state.cur_job);
         const [first] = this.state.job_data;
         console.log(first);
         if (this.state.job_data.length != 0 && first.type === 3 && first.status != 13) {
