@@ -8,4 +8,5 @@ test('render job list', () => {
     // Assert that components are rendered.
     expect(screen.getByTestId("test-table")).toBeInTheDocument();
     expect(screen.getByTestId("test-break-button")).toBeInTheDocument();
+    expect(screen.getByTestId("test-button")).toBeInTheDocument();
 });
