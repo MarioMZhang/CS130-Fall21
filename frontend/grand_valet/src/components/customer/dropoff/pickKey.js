@@ -180,10 +180,22 @@ export default class PickCar extends React.Component{
         var handler = new HTTPHandler();
         handler.getJobsFromID(id)
             .then(response => {
-                if (response.carLocation !== null) {
+                if (response.hubId !== null) {
+                    console.log(response.code);
                     this.setState({
-                        address: response.carLocation
+                        code: response.code
                     });
+                    this.setState({
+                        selected_hub:response.hubId
+                    });
+                    handler.getHubs()
+                        .then(response => {
+                            for (var i = 0; i < response.length; i ++) {
+                                if(response[i].hubId === this.state.selected_hub) {
+                                    this.state.address = response[i].description
+                                }
+                            }
+                        })
                 } else {
                     this.setState({
                         address: "An empty note for testing purpose"
@@ -245,19 +257,20 @@ export default class PickCar extends React.Component{
                                 Address: <br></br>
                                 {this.state.address}<br></br>
                                 <br></br>
-                                Verification code:
+                                Verification code: {this.state.code}
                                 <div style={{display:"flex", flexDirection:"row"}}>
 
-                                    <TextField
-                                        margin="normal"
-                                        required
-                                        fullWidth
-                                        name="code"
-                                        id="code"
-                                        autoFocus
-                                        style={{padding:5}}
-                                        defaultValue={this.state.code}
-                                    />
+                                    {/*<TextField*/}
+                                    {/*    margin="normal"*/}
+                                    {/*    required*/}
+                                    {/*    fullWidth*/}
+                                    {/*    name="code"*/}
+                                    {/*    id="code"*/}
+                                    {/*    autoFocus*/}
+                                    {/*    style={{padding:5}}*/}
+                                    {/*    defaultValue={this.state.code}*/}
+                                    {/*    disabled={true}*/}
+                                    {/*/>*/}
                                 </div>
                                 <Button
                                     // type="submit"
